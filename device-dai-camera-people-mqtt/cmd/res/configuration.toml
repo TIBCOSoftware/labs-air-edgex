@@ -1,0 +1,87 @@
+[Service]
+Host = "host.docker.internal"
+Port = 49545
+ConnectRetries = 20
+Labels = []
+OpenMsg = "device depthai started"
+Timeout = 5000
+EnableAsyncReadings = true
+AsyncBufferSize = 16
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+CheckInterval = "10s"
+FailLimit = 3
+FailWaitTime = 10
+
+[Clients]
+  [Clients.Data]
+  Name = "edgex-core-data"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48080
+  Timeout = 5000
+
+  [Clients.Metadata]
+  Name = "edgex-core-metadata"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48081
+  Timeout = 5000
+
+[Device]
+  DataTransform = true
+  InitCmd = ""
+  InitCmdArgs = ""
+  MaxCmdOps = 128
+  MaxCmdValueLen = 256
+  RemoveCmd = ""
+  RemoveCmdArgs = ""
+  ProfilesDir = "./res"
+
+[Logging]
+EnableRemote = false
+File = "./device-dai-camera-people-mqtt.log"
+
+[Writable]
+LogLevel = 'INFO'
+
+# Pre-define Devices
+[[DeviceList]]
+  Name = "OAK-D_Camera003"
+  Profile = "DAI-Camera-People"
+  Description = "Luxonis OAK-D Camera device"
+  Labels = [ "industrial", "camera", "mqtt" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.mqtt]
+      Schema = "tcp"
+      Host = "localhost"
+      Port = "1883"
+      ClientId = "EdgexDepthAICommandPublisher"
+      User = "mqtt_admin"
+      Password = "mqtt_admin"
+      Topic = "CommandTopic_STc47f5194b9d6"
+
+
+# Driver configs
+[Driver]
+IncomingSchema = "tcp"
+IncomingHost = "ad6321dc654964e9784e3d6cf166c0c1-523225883.us-west-2.elb.amazonaws.com"
+IncomingPort = "443"
+IncomingUser = "mqtt_admin"
+IncomingPassword = "mqtt_admin"
+IncomingQos = "2"
+IncomingKeepAlive = "36000"
+IncomingClientId = "EdgexDepthAIDataSubscriber"
+IncomingTopic = "/depthai/event/people"
+ResponseSchema = "tcp"
+ResponseHost = "ad6321dc654964e9784e3d6cf166c0c1-523225883.us-west-2.elb.amazonaws.com"
+ResponsePort = "443"
+ResponseUser = "mqtt_admin"
+ResponsePassword = "mqtt_admin"
+ResponseQos = "0"
+ResponseKeepAlive = "36000"
+ResponseClientId = "EdgexDepthAICommandResponseSubscriber"
+ResponseTopic = "ResponseTopic"

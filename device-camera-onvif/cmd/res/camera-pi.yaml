@@ -1,0 +1,220 @@
+name: "camera-pi"
+manufacturer: "RaspberryPI"
+model: "HQ ONVIF"
+labels:
+- "onvif"
+description: "Paspberry PI ONVIF-compliant IP camera"
+
+
+deviceResources:
+  - name: "onvif_device_information"
+    description: "results of ONVIF GetDeviceInformation call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDeviceInformation" }
+  - name: "onvif_profile_information"
+    description: "results of ONVIF GetProfiles call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFProfileInformation" }
+  - name: "OnvifHostname"
+    description: "results of ONVIF GetHostname call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFHostname" }
+  - name: "OnvifDateTime"
+    description: "results of ONVIF GetSystemDateAndTime call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDateTime" }
+  - name: "onvif_dns"
+    description: "results of ONVIF GetDNS call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDNS" }
+  - name: "onvif_network_interfaces"
+    description: "results of ONVIF GetNetworkInterfaces call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFNetworkInterfaces" }
+  - name: "onvif_network_protocols"
+    description: "results of ONVIF GetNetworkProtocols call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFNetworkProtocols" }
+  - name: "onvif_network_default_gateway"
+    description: "results of ONVIF GetNetworkDefaultGateway call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDefaultGateway" }
+  - name: "onvif_ntp"
+    description: "results of ONVIF GetNTP call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFNTP" }
+  - name: "onvif_users"
+    description: "results of ONVIF GetUsers call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFUsers" }
+  - name: "onvif_snapshot"
+    description: "snapshot from first ONVIF MediaProfile"
+    attributes:
+      { Pin_Num: "A0", Interface: "AIO", Type: "IN", Visualization: "Image", Inferable: "YES" }
+    properties:
+      value:
+        { type: "Binary", readWrite: "R", mediaType: "image/jpeg" }
+      units:
+        { type: "Binary", readWrite: "R", defaultValue: "ONVIFSnapshot" }
+  - name: "OnvifUser"
+    description: "ONVIF user in escaped JSON format"
+    properties:
+      value:
+        { type: "String", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R" }
+  - name: "OnvifReboot"
+    description: "should reboot ONVIF camera"
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "Bool", readWrite: "R" }
+  - name: "OnvifStreamURI"
+    description: "ONVIF RTSP URI"
+    properties:
+      value:
+        { type: "String", readWrite: "R" }
+      units:
+        { type: "String", readWrite: "R" }
+  - name: "OnvifHostnameFromDHCP"
+    description: "should set Hostname from DHCP"
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "Bool", readWrite: "R" }
+deviceCommands:
+  - name: "OnvifDeviceInformation"
+    get:
+      - { operation: "get", object: "onvif_device_information", property: "value", parameter: "cameradevice_onvif_deviceinformation" }
+  - name: "OnvifProfileInformation"
+    get:
+      - { operation: "get", object: "onvif_profile_information", property: "value", parameter: "cameradevice_onvif_profileinformation" }
+  - name: "OnvifHostname"
+    get:
+      - { operation: "get", object: "OnvifHostname", property: "value", parameter: "cameradevice_OnvifHostname" }
+    set:
+      - { operation: "set", object: "OnvifHostname", property: "value" }
+  - name: "OnvifDateTime"
+    get:
+      - { operation: "get", object: "OnvifDateTime", property: "value", parameter: "cameradevice_OnvifDateTime" }
+    set:
+      - { operation: "set", object: "OnvifDateTime", property: "value" }
+  - name: "OnvifDNS"
+    get:
+      - { operation: "get", object: "onvif_dns", property: "value", parameter: "cameradevice_onvif_dns" }
+  - name: "OnvifNetworkInterfaces"
+    get:
+      - { operation: "get", object: "onvif_network_interfaces", property: "value", parameter: "cameradevice_onvif_network_interfaces" }
+  - name: "OnvifNetworkProtocols"
+    get:
+      - { operation: "get", object: "onvif_network_protocols", property: "value", parameter: "cameradevice_onvif_network_protocols" }
+  - name: "OnvifNetworkDefaultGateway"
+    get:
+      - { operation: "get", object: "onvif_network_default_gateway", property: "value", parameter: "cameradevice_onvif_network_default_gateway" }
+  - name: "OnvifNTP"
+    get:
+      - { operation: "get", object: "onvif_ntp", property: "value", parameter: "cameradevice_onvif_ntp" }
+  - name: "OnvifUsers"
+    get:
+      - { operation: "get", object: "onvif_users", property: "value", parameter: "cameradevice_onvif_users" }
+    set:
+      - { operation: "set", object: "OnvifUser", property: "value" }
+  - name: "OnvifSnapshot"
+    get:
+      - { operation: "get", object: "onvif_snapshot", property: "value", parameter: "cameradevice_onvif_snapshot" }
+  - name: "OnvifReboot"
+    set:
+      - { operation: "set", object: "OnvifReboot", property: "value" }
+  - name: "OnvifStreamURI"
+    get:
+      - { operation: "get", object: "OnvifStreamURI", property: "value" }
+  - name: "OnvifHostnameFromDHCP"
+    set:
+      - { operation: "set", object: "OnvifHostnameFromDHCP", property: "value" }
+coreCommands:
+  -
+    name: Status
+    get:
+      path: "/api/v1/device/{deviceId}/Status"
+      responses:
+        -
+          code: "200"
+          description: "get the VersiCharge status"
+          expectedValues: ["State Value"]
+        -
+          code: "503"
+          description: "get status unavailable"
+          expectedValues: []
+  -
+    name: Voltage
+    get:
+      path: "/api/v1/device/{deviceId}/Voltage"
+      responses:
+        -
+          code: "200"
+          description: "get the VersiCharge voltage"
+          expectedValues: ["Voltage Value"]
+        -
+          code: "503"
+          description: "get voltage unavailable"
+          expectedValues: []
+  -
+    name: Current
+    get:
+      path: "/api/v1/device/{deviceId}/Current"
+      responses:
+        -
+          code: "200"
+          description: "get the VersiCharge current"
+          expectedValues: ["Current Value"]
+        -
+          code: "503"
+          description: "get current unavailable"
+          expectedValues: []
+  -
+    name: Energy
+    get:
+      path: "/api/v1/device/{deviceId}/Energy"
+      responses:
+        -
+          code: "200"
+          description: "get the VersiCharge energy consumption"
+          expectedValues: ["Energy Value"]
+        -
+          code: "503"
+          description: "get energy unavailable"
+          expectedValues: []
+
+  

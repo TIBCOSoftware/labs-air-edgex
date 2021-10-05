@@ -1,0 +1,78 @@
+# Copyright 2017 Dell Inc. All rights reserved.
+name: "OPCUA-Server"
+manufacturer: "Burning"
+model: "1"
+labels:
+  - "OPCUA"
+  - "test"
+description: "Simulation results of OPCUA Server"
+deviceResources:
+  -
+    name: "ns=3;i=1001"
+    description: "generated counter number"
+    properties:
+      value:
+        { type: "Int32", size: "4", readWrite: "R", defaultValue: "0", minimum: "0", maximum: "100"  }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "" }
+  -
+    name: "ns=3;i=1002"
+    description: "generated random number"
+    properties:
+      value:
+        { type: "Double", size: "4", readWrite: "R", defaultValue: "0.00", minimum: "0.00", maximum: "1.00"  }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "" }
+
+deviceCommands:
+  -
+    name: "CounterNum"
+    get:
+      -
+        { index: "1", operation: "get", deviceResource: "ns=3;i=1001" }
+    set:
+      - { index: "1", operation: "set", deviceResource: "ns=3;i=1001" }
+  -
+    name: "RandomNum"
+    get:
+      -
+        { index: "1", operation: "get", deviceResource: "ns=3;i=1002" }
+coreCommands:
+  -
+    name: "CounterNum"
+    get:
+      path: "/api/v1/device/{deviceId}/CounterNum"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["ns=3;i=1001"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+    put:
+      path: "/api/v1/device/{deviceId}/CounterNum"
+      parameterNames: ["ns=3;i=1001"]
+      response:
+        -
+          code: "204"
+          description: "set Counter1"
+          expectedValues: []
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "RandomNum"
+    get:
+      path: "/api/v1/device/{deviceId}/RandomNum"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["ns=3;i=1002"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []

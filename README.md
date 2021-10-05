@@ -1,1 +1,9 @@
-# labs-air-edgex
+# Project Air
+
+Project Air is an IoT platform for the registration of devices, process of IoT produced data and definition, deployment and configuration of Application pipelines.
+
+For more information please visit [Project Air](https://tibcosoftware.github.io/labs-air/) docs page.
+
+## Introduction
+
+These components are device, services and other [edgex](https://www.edgexfoundry.org/) specific add-ons for project Air.

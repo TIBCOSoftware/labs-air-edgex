@@ -1,0 +1,20 @@
+name: labs-air-app-service-metadata
+version: git
+summary: An edgex service to provide metadata.
+description: |
+  An edgex service to provide metadata.
+confinement: devmode
+base: core18
+
+parts:
+  app-service-metadata:
+    plugin: go
+    go-importpath: github.com/TIBCOSoftware/labs-air/edgexfoundry/app-service-metadata
+    source: .
+    source-type: git
+    build-packages:
+      - gcc
+
+apps:
+  app-service-metadata:
+    command: bin/app-service-metadata

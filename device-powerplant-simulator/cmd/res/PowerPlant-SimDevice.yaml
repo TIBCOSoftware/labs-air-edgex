@@ -1,0 +1,216 @@
+name: "PowerPlant-SimDevice"
+manufacturer: "PowerPlant"
+model: "SG"
+labels:
+- "in"
+description: "PowerPlant device profile"
+
+
+deviceResources:
+  -
+    name: "ProdPerMinute"
+    description: "Measures the energy produced per minute"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "50.0", maximum: "500.0", defaultValue: "170.0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "W" }
+  -
+    name: "Pressure"
+    description: "Measures pressure"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "-3.0", maximum: "0.0", defaultValue: "-1.0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "TBD" }
+  -
+    name: "WasteGas"
+    description: "Measures WasteGas"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "4.5", maximum: "11.5", defaultValue: "6.5"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "TBD" }
+  -
+    name: "LossOfEfficiency"
+    description: "Measures LossOfEfficiency"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "0.0", maximum: "0.5", defaultValue: "0.25"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "TBD" }
+  -
+    name: "BaroPressure"
+    description: "Measures BaroPressure"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "28.0", maximum: "30.0", defaultValue: "29.2"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "TBD" }
+  -
+    name: "PowerIn"
+    description: "Measures PowerIn"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "0.0", maximum: "210.0", defaultValue: "150.0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "TBD" }
+  -
+    name: "SR"
+    description: "Measures SR"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "0.0", maximum: "1.0", defaultValue: "0.5"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "TBD" }
+  -
+    name: "1dp"
+    description: "Measures 1dp"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "0.0", maximum: "1.0", defaultValue: "0.5"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "TBD" }
+deviceCommands:
+  -
+    name: ProdPerMinute
+    get:
+      - { index: "1", operation: "get", object: "ProdPerMinute", parameter: "" }
+  -
+    name: Pressure
+    get:
+      - { index: "1", operation: "get", object: "Pressure", parameter: "" }
+  -
+    name: WasteGas
+    get:
+      - { index: "1", operation: "get", object: "WasteGas", parameter: "" }
+  -
+    name: LossOfEfficiency
+    get:
+      - { index: "1", operation: "get", object: "LossOfEfficiency", parameter: "" }
+  -
+    name: BaroPressure
+    get:
+      - { index: "1", operation: "get", object: "BaroPressure", parameter: "" }
+  -
+    name: PowerIn
+    get:
+      - { index: "1", operation: "get", object: "PowerIn", parameter: "" }
+  -
+    name: SR
+    get:
+      - { index: "1", operation: "get", object: "SR", parameter: "" }
+  -
+    name: 1dp
+    get:
+      - { index: "1", operation: "get", object: "1dp", parameter: "" }
+
+coreCommands:
+  -
+    name: ProdPerMinute
+    get:
+      path: "/api/v1/device/{deviceId}/ProdPerMinute"
+      responses:
+        -
+          code: "200"
+          description: "get the production per minute"
+          expectedValues: ["ProdPerMinute Value"]
+        -
+          code: "503"
+          description: "get ProdPerMinute unavailable"
+          expectedValues: []
+  -
+    name: Pressure
+    get:
+      path: "/api/v1/device/{deviceId}/Pressure"
+      responses:
+        -
+          code: "200"
+          description: "get the pressure"
+          expectedValues: ["Pressure Value"]
+        -
+          code: "503"
+          description: "get pressure unavailable"
+          expectedValues: []
+  -
+    name: WasteGas
+    get:
+      path: "/api/v1/device/{deviceId}/WasteGas"
+      responses:
+        -
+          code: "200"
+          description: "get the Smart Valve amperage"
+          expectedValues: ["WasteGas Value"]
+        -
+          code: "503"
+          description: "get WasteGas unavailable"
+          expectedValues: []
+  -
+    name: LossOfEfficiency
+    get:
+      path: "/api/v1/device/{deviceId}/LossOfEfficiency"
+      responses:
+        -
+          code: "200"
+          description: "get the LossOfEfficiency"
+          expectedValues: ["LossOfEfficiency Value"]
+        -
+          code: "503"
+          description: "get LossOfEfficiency unavailable"
+          expectedValues: []
+  -
+    name: BaroPressure
+    get:
+      path: "/api/v1/device/{deviceId}/BaroPressure"
+      responses:
+        -
+          code: "200"
+          description: "get the BaroPressure"
+          expectedValues: ["BaroPressure Value"]
+        -
+          code: "503"
+          description: "get BaroPressure unavailable"
+          expectedValues: []
+  -
+    name: PowerIn
+    get:
+      path: "/api/v1/device/{deviceId}/PowerIn"
+      responses:
+        -
+          code: "200"
+          description: "get the PowerIn"
+          expectedValues: ["PowerIn Value"]
+        -
+          code: "503"
+          description: "get PowerIn unavailable"
+          expectedValues: []
+  -
+    name: SR
+    get:
+      path: "/api/v1/device/{deviceId}/SR"
+      responses:
+        -
+          code: "200"
+          description: "get the SR"
+          expectedValues: ["SR Value"]
+        -
+          code: "503"
+          description: "get SR unavailable"
+          expectedValues: []
+  -
+    name: 1dp
+    get:
+      path: "/api/v1/device/{deviceId}/1dp"
+      responses:
+        -
+          code: "200"
+          description: "get the 1dp"
+          expectedValues: ["1dp Value"]
+        -
+          code: "503"
+          description: "get 1dp unavailable"
+          expectedValues: []
+
+
+  
+

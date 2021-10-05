@@ -1,0 +1,81 @@
+[Service]
+Host = "host.docker.internal"
+Port = 49515
+ConnectRetries = 20
+Labels = []
+OpenMsg = "Camera device service started"
+Timeout = 5000
+EnableAsyncReadings = true
+AsyncBufferSize = 16
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+CheckInterval = "10s"
+FailLimit = 3
+FailWaitTime = 10
+
+[Clients]
+  [Clients.Data]
+  Name = "edgex-core-data"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48080
+  Timeout = 5000
+
+  [Clients.Metadata]
+  Name = "edgex-core-metadata"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48081
+  Timeout = 5000
+
+  [Clients.Logging]
+  Name = "edgex-support-logging"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48061
+
+[Device]
+  DataTransform = true
+  InitCmd = ""
+  InitCmdArgs = ""
+  MaxCmdOps = 128
+  MaxCmdValueLen = 256
+  RemoveCmd = ""
+  RemoveCmdArgs = ""
+  ProfilesDir = "./res"
+
+[Logging]
+EnableRemote = false
+File = "./device-camera.log"
+Level = "DEBUG"
+
+[Writable]
+LogLevel = 'INFO'
+
+# Pre-define Devices
+[[DeviceList]]
+  Name = "CameraPiHQ001"
+  Profile = "camera-pi"
+  Description = "RaspberryPI HQ camera"
+  Labels = [ "charger", "ev" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.HTTP]
+      Address = "192.168.1.104:8081"
+  [[DeviceList.AutoEvents]]
+    Frequency = "15s"
+    OnChange = false
+    Resource = "onvif_snapshot"
+
+# Driver configs
+[Driver]
+User = 'admin'
+Password = 'admin'
+# Assign AuthMethod to 'digest' | 'basic' | 'none'
+# AuthMethod specifies the authentication method used when
+# requesting still images from the URL returned by the ONVIF
+# "GetSnapshotURI" command.  All ONVIF requests will be
+# carried out using digest auth.
+AuthMethod = 'basic'

@@ -1,0 +1,42 @@
+name: "Arduino-Device"
+manufacturer: "Arduino"
+model: "Arduino MKR WiFi 1010 Baseboard"
+labels:
+- "mqtt"
+description: "Arduino device profile"
+
+
+deviceResources:
+  - name: "Button"
+    description: "Value for the state of a button"
+    attributes:
+      { Pin_Num: "D8", Interface: "GPIO", Type: "OUT" }
+    properties:
+      value:
+        { type: "Int16", readWrite: "R", minimun: "0", maximum: "1", defaultValue: "0" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "NA" }
+
+deviceCommands:
+  -
+    name: Button
+    get:
+      - { index: "1", operation: "get", object: "Button", parameter: "Button", property: "value" }
+
+coreCommands:
+  -
+    name: Button
+    get:
+      path: "/api/v1/device/{deviceId}/Button"
+      responses:
+        -
+          code: "200"
+          description: "get the button sensor value"
+          expectedValues: ["Button"]
+        -
+          code: "503"
+          description: "get Button service unavailable"
+          expectedValues: []
+
+
+    

@@ -1,0 +1,76 @@
+[Service]
+Host = "host.docker.internal"
+Port = 49555
+ConnectRetries = 20
+Labels = []
+OpenMsg = "Device Audio started"
+Timeout = 5000
+EnableAsyncReadings = true
+AsyncBufferSize = 16
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+CheckInterval = "10s"
+FailLimit = 3
+FailWaitTime = 10
+
+[Clients]
+  [Clients.Data]
+  Name = "edgex-core-data"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48080
+  Timeout = 5000
+
+  [Clients.Metadata]
+  Name = "edgex-core-metadata"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48081
+  Timeout = 5000
+
+  [Clients.Logging]
+  Name = "edgex-support-logging"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48061
+
+[Device]
+  DataTransform = true
+  InitCmd = ""
+  InitCmdArgs = ""
+  MaxCmdOps = 128
+  MaxCmdValueLen = 256
+  RemoveCmd = ""
+  RemoveCmdArgs = ""
+  ProfilesDir = "./res"
+
+[Logging]
+EnableRemote = false
+File = "./device-audio.log"
+Level = "DEBUG"
+
+[Writable]
+LogLevel = 'INFO'
+
+# Pre-define Devices
+[[DeviceList]]
+  Name = "Fan"
+  Profile = "Audio-Device"
+  Description = "Fan with audio sensor"
+  Labels = [ "audio", "equipment" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.HTTP]
+      Address = "http://localhost:8080/audio"
+  [[DeviceList.AutoEvents]]
+    Frequency = "10s"
+    OnChange = false
+    Resource = "microphone"
+
+
+[Driver]
+  AudioStreamerURL = "http://localhost:8080/audio"
+  StreamerSampleRate = "16000"
+  StreamerSampleDurationSec = "10"

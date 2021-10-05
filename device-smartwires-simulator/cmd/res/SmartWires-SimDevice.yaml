@@ -1,0 +1,90 @@
+name: "SmartWires-SimDevice"
+manufacturer: "SmartWires"
+model: "SG"
+labels:
+- "industrial"
+description: "SmartWires Smart Valve device profile"
+
+
+deviceResources:
+  -
+    name: "Voltage"
+    description: "Measures device voltage"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "200", maximum: "250", defaultValue: "220"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Volts" }
+  -
+    name: "Amperage"
+    description: "Measures the strength of electric current"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "0", maximum: "35", defaultValue: "30"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Amp" }
+  -
+    name: "Temperature"
+    description: "Measures the temperature of the wire"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "0", maximum: "150", defaultValue: "0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "kWh" }
+deviceCommands:
+  -
+    name: Voltage
+    get:
+      - { index: "1", operation: "get", object: "Voltage", parameter: "" }
+  -
+    name: Amperage
+    get:
+      - { index: "1", operation: "get", object: "Amperage", parameter: "" }
+  -
+    name: Temperature
+    get:
+      - { index: "1", operation: "get", object: "Temperature", parameter: "" }
+ 
+coreCommands:
+  -
+    name: Voltage
+    get:
+      path: "/api/v1/device/{deviceId}/Voltage"
+      responses:
+        -
+          code: "200"
+          description: "get the Smart valve voltage"
+          expectedValues: ["Voltage Value"]
+        -
+          code: "503"
+          description: "get voltage unavailable"
+          expectedValues: []
+  -
+    name: Amperage
+    get:
+      path: "/api/v1/device/{deviceId}/Amperage"
+      responses:
+        -
+          code: "200"
+          description: "get the Smart Valve amperage"
+          expectedValues: ["Amperage Value"]
+        -
+          code: "503"
+          description: "get amperage unavailable"
+          expectedValues: []
+  -
+    name: Temperature
+    get:
+      path: "/api/v1/device/{deviceId}/Temperature"
+      responses:
+        -
+          code: "200"
+          description: "get the Smart Valve temperature"
+          expectedValues: ["Temperature Value"]
+        -
+          code: "503"
+          description: "get temperature unavailable"
+          expectedValues: []
+
+  
+
