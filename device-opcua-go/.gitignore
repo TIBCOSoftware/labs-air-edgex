@@ -1,6 +1,0 @@
-*~
-*.log
-cmd/device-opcua-ua
-go.sum
-vendor
-.idea
