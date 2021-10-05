@@ -1,0 +1,71 @@
+[Service]
+Host = "host.docker.internal"
+Port = 48998
+ConnectRetries = 20
+Labels = []
+OpenMsg = "device SmartWires started"
+Timeout = 5000
+EnableAsyncReadings = true
+AsyncBufferSize = 16
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+CheckInterval = "10s"
+FailLimit = 3
+FailWaitTime = 10
+
+[Clients]
+  [Clients.Data]
+  Name = "edgex-core-data"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48080
+  Timeout = 5000
+
+  [Clients.Metadata]
+  Name = "edgex-core-metadata"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48081
+  Timeout = 5000
+
+  [Clients.Logging]
+  Name = "edgex-support-logging"
+  Protocol = "http"
+  Host = "localhost"
+  Port = 48061
+
+[Device]
+  DataTransform = true
+  InitCmd = ""
+  InitCmdArgs = ""
+  MaxCmdOps = 128
+  MaxCmdValueLen = 256
+  RemoveCmd = ""
+  RemoveCmdArgs = ""
+  ProfilesDir = "./res"
+
+[Logging]
+EnableRemote = false
+File = "./device-smartwires.log"
+Level = "DEBUG"
+
+[Writable]
+LogLevel = 'INFO'
+
+# Pre-define Devices
+[[DeviceList]]
+  Name = "smartvalve-0001"
+  Profile = "SmartWires-SimDevice"
+  Description = "SmartWires device simulator"
+  Labels = [ "charger", "ev" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.other]
+      Address = "devicesmartwires"
+      Port = "300"
+
+
+[Driver]
+  SimulationInterval = "30"

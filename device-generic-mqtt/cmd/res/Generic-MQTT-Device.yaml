@@ -1,0 +1,77 @@
+name: "Generic-MQTT-Device"
+manufacturer: "Acne"
+model: "Acne 12334"
+labels:
+- "mqtt"
+description: "Generic device profile"
+
+
+deviceResources:
+  - name: "image_reading"
+    description: "Image from a camera"
+    attributes:
+      { Pin_Num: "A0", Interface: "AIO", Type: "IN", Visualization: "Image" }
+    properties:
+      value:
+        { type: "Binary", readWrite: "R", mediaType: "image/jpeg" }
+      units:
+        { type: "Binary", readWrite: "R", defaultValue: "Image" }
+  - name: "str_reading"
+    description: "sensor string reading"
+    properties:
+      value:
+        { type: "String", readWrite: "R"  }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "" }
+  - name: "bool_reading"
+    description: "sensor bool reading"
+    properties:
+      value:
+        { type: "Bool", readWrite: "R" }
+      units:
+        { type: "Bool", readWrite: "R" }
+  - name: "int16_reading"
+    description: "sensor integer reading"
+    properties:
+      value:
+        { type: "Int16", readWrite: "R", minimum: "0", maximum: "100", defaultValue: "0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "NA" }
+  - name: "float32_reading"
+    description: "sensor float32 reading"
+    properties:
+      value:
+        { type: "Float32", size: "4", readWrite: "R", floatEncoding: "eNotation", defaultValue: "0.00", minimum: "0.0", maximum: "100.0" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "" }
+deviceCommands:
+  - name: testImageReading
+    get:
+      - { index: "1", operation: "get", deviceResource: "image_reading"}
+  - name: testStrReading
+    get:
+      - { index: "1", operation: "get", deviceResource: "str_reading"}
+  - name: testBoolReading
+    get:
+      - { index: "1", operation: "get", deviceResource: "bool_reading"}
+  - name: testInt16Reading
+    get:
+      - { index: "1", operation: "get", deviceResource: "int16_reading"}
+  - name: testFloat32Reading
+    get:
+      - { index: "1", operation: "get", deviceResource: "float32_reading"}
+
+coreCommands:
+  - name: testFloat32Reading
+    get:
+      path: "/api/v1/device/{deviceId}/testFloat32Reading"
+      responses:
+      - code: "200"
+        description: "get the random float32 value"
+        expectedValues: ["float32_reading"]
+      - code: "500"
+        description: "internal server error"
+        expectedValues: []
+
+
+    

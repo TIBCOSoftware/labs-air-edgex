@@ -1,0 +1,66 @@
+name: "LabMonitor-SimDevice"
+manufacturer: "LabMonitor"
+model: "SG"
+labels:
+- "in"
+description: "LabMonitor device profile"
+
+
+deviceResources:
+  -
+    name: "Energy"
+    description: "Measures the binding energy"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "-10.0", maximum: "-5.0", defaultValue: "-7.0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "eV" }
+  -
+    name: "Distance"
+    description: "Measures atom separation distance"
+    properties:
+      value:
+        { type: "Float32", readWrite: "R", minimum: "0.0", maximum: "2.0", defaultValue: "1.5"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Angstrom" }
+deviceCommands:
+  -
+    name: Energy
+    get:
+      - { index: "1", operation: "get", object: "Energy", parameter: "" }
+  -
+    name: Distance
+    get:
+      - { index: "1", operation: "get", object: "Distance", parameter: "" }
+ 
+coreCommands:
+  -
+    name: Energy
+    get:
+      path: "/api/v1/device/{deviceId}/Energy"
+      responses:
+        -
+          code: "200"
+          description: "get the Smart valve voltage"
+          expectedValues: ["Energy Value"]
+        -
+          code: "503"
+          description: "get voltage unavailable"
+          expectedValues: []
+  -
+    name: Distance
+    get:
+      path: "/api/v1/device/{deviceId}/Distance"
+      responses:
+        -
+          code: "200"
+          description: "get the Smart Valve amperage"
+          expectedValues: ["Distance Value"]
+        -
+          code: "503"
+          description: "get amperage unavailable"
+          expectedValues: []
+
+
+  
+

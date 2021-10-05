@@ -1,0 +1,74 @@
+name: "DAI-Camera-Mask"
+manufacturer: "Luxonis"
+model: "BW1098OBC DepthAI USB3C Baseboard"
+labels:
+- "mqtt"
+description: "DepthAI device profile"
+
+
+deviceResources:
+  - name: "DAI_Snapshot"
+    description: "snapshot from DepthAI Camera"
+    attributes:
+      { Pin_Num: "A0", Interface: "AIO", Type: "IN", Visualization: "Image" }
+    properties:
+      value:
+        { type: "Binary", readWrite: "R", mediaType: "image/jpeg" }
+      units:
+        { type: "Binary", readWrite: "R", defaultValue: "RTSPSnapshot" }
+  - name: "NumMasks"
+    description: "Num of people wearing masks"
+    properties:
+      value:
+        { type: "Int16", readWrite: "R", minimum: "0", maximum: "100", defaultValue: "0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "NA" }
+  - name: "NumNoMasks"
+    description: "Num of people not wearing masks"
+    properties:
+      value:
+        { type: "Int16", readWrite: "R", minimum: "0", maximum: "100", defaultValue: "0"}
+      units:
+        { type: "String", readWrite: "R", defaultValue: "NA" }
+deviceCommands:
+  -
+    name: DAI_Snapshot
+    get:
+      - { index: "1", operation: "get", object: "DAI_Snapshot", parameter: "DAI_Snapshot", property: "value" }
+  -
+    name: NumMasks
+    get:
+      - { index: "1", operation: "get", object: "NumMasks", parameter: "NumMasks", property: "value" }
+  -
+    name: NumNoMasks
+    get:
+      - { index: "1", operation: "get", object: "NumNoMasks", parameter: "NumNoMasks", property: "value" }
+coreCommands:
+  -
+    name: Humidity
+    get:
+      path: "/api/v1/device/{deviceId}/Humidity"
+      responses:
+        -
+          code: "200"
+          description: "get the light sensor value"
+          expectedValues: ["Humidity"]
+        -
+          code: "503"
+          description: "get Humidity service unavailable"
+          expectedValues: []
+  -
+    name: Temperature
+    get:
+      path: "/api/v1/device/{deviceId}/Temperature"
+      responses:
+        -
+          code: "200"
+          description: "get the rotary angle sensor value"
+          expectedValues: ["Temperature"]
+        -
+          code: "503"
+          description: "get Temperature service unavailable"
+          expectedValues: []
+
+    

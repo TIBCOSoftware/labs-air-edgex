@@ -1,0 +1,38 @@
+name: "camera-wyze"
+manufacturer: "Wyze"
+model: "Wyze"
+labels:
+- "rtsp"
+description: "Wyze RTSP IP camera"
+
+
+deviceResources:
+  - name: "rtsp_snapshot"
+    description: "snapshot from first RTSP MediaProfile"
+    attributes:
+      { Pin_Num: "A0", Interface: "AIO", Type: "IN", Visualization: "Image", Inferable: "YES" }
+    properties:
+      value:
+        { type: "Binary", readWrite: "R", mediaType: "image/jpeg" }
+      units:
+        { type: "Binary", readWrite: "R", defaultValue: "RTSPSnapshot" }
+deviceCommands:
+  - name: "RTSPSnapshot"
+    get:
+      - { operation: "get", object: "rtsp_snapshot", property: "value", parameter: "cameradevice_rtsp_snapshot" }
+coreCommands:
+  -
+    name: Status
+    get:
+      path: "/api/v1/device/{deviceId}/Status"
+      responses:
+        -
+          code: "200"
+          description: "get the VersiCharge status"
+          expectedValues: ["State Value"]
+        -
+          code: "503"
+          description: "get status unavailable"
+          expectedValues: []
+
+  
