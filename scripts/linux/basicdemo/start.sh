@@ -124,7 +124,7 @@ replace_token
 
 run_service service-metadata 5
 
-run_service device-siemens-simulator
+#run_service device-siemens-simulator
 
 run_service device-generic-mqtt
 
