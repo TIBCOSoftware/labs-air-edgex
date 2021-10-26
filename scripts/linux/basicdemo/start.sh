@@ -83,6 +83,8 @@ install_cors_plugin () {
     --data "config.max_age=3600"
 }
 
+export EDGEX_TOKEN=""
+
 run_service security-secrets-setup
 
 run_service consul

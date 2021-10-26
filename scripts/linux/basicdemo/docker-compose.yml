@@ -739,7 +739,7 @@ services:
       ApplicationSettings_GatewayDeployNetwork: ${GATEWAY_DEPLOY_NETWORK}
       ApplicationSettings_GatewayLatitude: ${GATEWAY_LATITUDE}
       ApplicationSettings_GatewayLongitude: ${GATEWAY_LONGITUDE}
-      ApplicationSettings_GatewayAccessToken: ${GATEWAY_ACCESS_TOKEN}
+      ApplicationSettings_GatewayAccessToken: ${EDGEX_TOKEN}
       ApplicationSettings_GatewayUsername: ${GATEWAY_USERNAME}
       ApplicationSettings_GatewayPlatform: ${GATEWAY_PLATFORM}
       ApplicationSettings_MetadataClient: ${GATEWAY_METADATA_CLIENT}
