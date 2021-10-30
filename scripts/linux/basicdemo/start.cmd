@@ -82,5 +82,5 @@ curl -X POST http://localhost:8001/plugins/ ^
 
 
 echo "\n"
-echo -e "\033[0;32m All services started. Edgex is ready\033[0m"
+echo -e " All services started. Edgex is ready "
 
