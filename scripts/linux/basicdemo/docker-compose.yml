@@ -1,0 +1,861 @@
+version: '3.7'
+networks:
+  edgex-network:
+    driver: bridge
+volumes:
+  consul-config: {}
+  consul-data: {}
+  consul-scripts: {}
+  db-data: {}
+  kong: {}
+  log-data: {}
+  postgres-data: {}
+  secrets-setup-cache: {}
+  vault-config: {}
+  vault-file: {}
+  vault-init: {}
+  vault-logs: {}
+services:
+  app-service-rules:
+    container_name: edgex-app-service-configurable-rules
+    depends_on:
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
+    environment:
+      BINDING_PUBLISHTOPIC: rules-events
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_PROFILE: rules-engine-mqtt
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      MESSAGEBUS_PUBLISHHOST_HOST: edgex-mqtt-broker
+      MESSAGEBUS_SUBSCRIBEHOST_HOST: edgex-mqtt-broker
+      REGISTRY_HOST: edgex-core-consul
+      SERVICE_HOST: edgex-app-service-configurable-rules
+      SERVICE_PORT: 48100
+    hostname: edgex-app-service-configurable-rules
+    image: edgexfoundry/docker-app-service-configurable:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:48100:48100/tcp
+    read_only: true
+  command:
+    container_name: edgex-core-command
+    depends_on:
+      consul:
+        condition: service_started
+      database:
+        condition: service_started
+      metadata:
+        condition: service_started
+      security-bootstrap-database:
+        condition: service_started
+      vault-worker:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_ROOTCACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSTORE_SERVERNAME: edgex-vault
+      SECRETSTORE_TOKENFILE: /tmp/edgex/secrets/edgex-core-command/secrets-token.json
+      SERVICE_HOST: edgex-core-command
+    hostname: edgex-core-command
+    image: edgexfoundry/docker-core-command-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:48082:48082/tcp
+    read_only: true
+    volumes:
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-core-command:/tmp/edgex/secrets/edgex-core-command:ro,z
+  consul:
+    container_name: edgex-core-consul
+    depends_on:
+      security-secrets-setup:
+        condition: service_started
+    environment:
+      EDGEX_DB: redis
+      EDGEX_SECURE: "true"
+      SECRETSTORE_SETUP_DONE_FLAG: /tmp/edgex/secrets/edgex-consul/.secretstore-setup-done
+    hostname: edgex-core-consul
+    image: edgexfoundry/docker-edgex-consul:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:8500:8500/tcp
+    read_only: true
+    volumes:
+    - consul-config:/consul/config:z
+    - consul-data:/consul/data:z
+    - consul-scripts:/consul/scripts:z
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-consul:/tmp/edgex/secrets/edgex-consul:ro,z
+    - /tmp/edgex/secrets/edgex-kong:/tmp/edgex/secrets/edgex-kong:ro,z
+    - /tmp/edgex/secrets/edgex-vault:/tmp/edgex/secrets/edgex-vault:ro,z
+  data:
+    container_name: edgex-core-data
+    depends_on:
+      consul:
+        condition: service_started
+      database:
+        condition: service_started
+      metadata:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
+      security-bootstrap-database:
+        condition: service_started
+      vault-worker:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      MESSAGEQUEUE_HOST: edgex-mqtt-broker
+      MESSAGEQUEUE_OPTIONAL_CLIENTID: edgex-core-data
+      MESSAGEQUEUE_PORT: 1883
+      MESSAGEQUEUE_TYPE: mqtt
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_ROOTCACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSTORE_SERVERNAME: edgex-vault
+      SECRETSTORE_TOKENFILE: /tmp/edgex/secrets/edgex-core-data/secrets-token.json
+      SERVICE_HOST: edgex-core-data
+    hostname: edgex-core-data
+    image: edgexfoundry/docker-core-data-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:5563:5563/tcp
+    - 127.0.0.1:48080:48080/tcp
+    read_only: true
+    volumes:
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-core-data:/tmp/edgex/secrets/edgex-core-data:ro,z
+  database:
+    container_name: edgex-redis
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      REGISTRY_HOST: edgex-core-consul
+    hostname: edgex-redis
+    image: redis:6.0.9-alpine
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:6379:6379/tcp
+    read_only: true
+    volumes:
+    - db-data:/data:z
+  device-mqtt:
+    container_name: edgex-device-mqtt
+    depends_on:
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      DRIVER_INCOMINGHOST: edgex-mqtt-broker
+      DRIVER_RESPONSEHOST: edgex-mqtt-broker
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      REGISTRY_HOST: edgex-core-consul
+      SERVICE_HOST: edgex-device-mqtt
+    hostname: edgex-device-mqtt
+    image: edgexfoundry/docker-device-mqtt-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:49982:49982/tcp
+    read_only: true
+  device-virtual:
+    container_name: edgex-device-virtual
+    depends_on:
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      REGISTRY_HOST: edgex-core-consul
+      SERVICE_HOST: edgex-device-virtual
+    hostname: edgex-device-virtual
+    image: edgexfoundry/docker-device-virtual-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:49990:49990/tcp
+  edgex-proxy:
+    container_name: edgex-proxy
+    depends_on:
+      consul:
+        condition: service_started
+      kong:
+        condition: service_started
+      vault-worker:
+        condition: service_started
+    entrypoint: '/bin/sh -c  "until /consul/scripts/consul-svc-healthy.sh kong; do
+      sleep 1; done; until /consul/scripts/consul-svc-healthy.sh security-secretstore-setup;
+      do sleep 1; done; /edgex/security-proxy-setup --init=true"
+
+      '
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      KONGURL_SERVER: kong
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSERVICE_CACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSERVICE_SERVER: edgex-vault
+      SECRETSERVICE_SNIS: edgex-kong
+      SECRETSERVICE_TOKENPATH: /tmp/edgex/secrets/edgex-security-proxy-setup/secrets-token.json
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_ROOTCACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSTORE_SERVERNAME: edgex-vault
+      ADD_PROXY_ROUTE: filtering.http://air-app-service-filtering:48530,flogorules.http://air-app-service-flogo-rules:48095,inferencing.http://air-app-service-inferencing:48525
+    hostname: edgex-proxy
+    image: edgexfoundry/docker-security-proxy-setup-go:1.3.0
+    networks:
+      edgex-network: {}
+    read_only: true
+    volumes:
+    - consul-scripts:/consul/scripts:ro,z
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-security-proxy-setup:/tmp/edgex/secrets/edgex-security-proxy-setup:ro,z
+  kong:
+    command: '/bin/sh -c  "until /consul/scripts/consul-svc-healthy.sh kong-migrations;
+      do sleep 1; done; /docker-entrypoint.sh kong docker-start"
+
+      '
+    container_name: kong
+    depends_on:
+      consul:
+        condition: service_started
+      kong-db:
+        condition: service_started
+      kong-migrations:
+        condition: service_started
+    environment:
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_PASSWORD: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+    hostname: kong
+    image: kong:2.0.5
+    networks:
+      edgex-network: {}
+    ports:
+    - published: 8000
+      target: 8000
+    - 127.0.0.1:8001:8001/tcp
+    - published: 8443
+      target: 8443
+    - 127.0.0.1:8444:8444/tcp
+    read_only: true
+    restart: on-failure
+    tmpfs:
+    - /run
+    - /tmp
+    tty: true
+    volumes:
+    - consul-scripts:/consul/scripts:ro,z
+    - kong:/usr/local/kong:rw
+  kong-db:
+    container_name: kong-db
+    depends_on:
+      security-secrets-setup:
+        condition: service_started
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: kong
+      POSTGRES_USER: kong
+    hostname: kong-db
+    image: postgres:12.3-alpine
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:5432:5432/tcp
+    read_only: true
+    tmpfs:
+    - /var/run
+    - /tmp
+    - /run
+    volumes:
+    - postgres-data:/var/lib/postgresql/data:z
+  kong-migrations:
+    command: "/bin/sh -cx  'until /consul/scripts/consul-svc-healthy.sh kong-db;\n\
+      \   do sleep 1;\ndone && kong migrations bootstrap; kong migrations list; code=$$?;\
+      \ if [ $$code -eq 5 ]; then\n  kong migrations up && kong migrations finish;\n\
+      fi'\n"
+    container_name: kong-migrations
+    depends_on:
+      consul:
+        condition: service_started
+      kong-db:
+        condition: service_started
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-db
+      KONG_PG_PASSWORD: kong
+    image: kong:2.0.5
+    networks:
+      edgex-network: {}
+    read_only: true
+    tmpfs:
+    - /tmp
+    volumes:
+    - consul-scripts:/consul/scripts:ro,z
+  metadata:
+    container_name: edgex-core-metadata
+    depends_on:
+      consul:
+        condition: service_started
+      database:
+        condition: service_started
+      notifications:
+        condition: service_started
+      security-bootstrap-database:
+        condition: service_started
+      vault-worker:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      NOTIFICATIONS_SENDER: edgex-core-metadata
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_ROOTCACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSTORE_SERVERNAME: edgex-vault
+      SECRETSTORE_TOKENFILE: /tmp/edgex/secrets/edgex-core-metadata/secrets-token.json
+      SERVICE_HOST: edgex-core-metadata
+    hostname: edgex-core-metadata
+    image: edgexfoundry/docker-core-metadata-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:48081:48081/tcp
+    read_only: true
+    volumes:
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-core-metadata:/tmp/edgex/secrets/edgex-core-metadata:ro,z
+  mqtt-broker:
+    container_name: edgex-mqtt-broker
+    hostname: edgex-mqtt-broker
+    image: eclipse-mosquitto:1.6.3
+    networks:
+      edgex-network: {}
+    ports:
+    - published: 1883
+      target: 1883
+    read_only: true
+  # mqtt-broker:
+  #   container_name: edgex-mqtt-broker
+  #   hostname: edgex-mqtt-broker
+  #   image: emqx/emqx:4.2.7
+  #   networks: 
+  #     edgex-network: {}
+  #   ports:
+  #   - published: 1883
+  #     target: 1883
+  #   - published: 8083
+  #     target: 8083
+  #   - published: 8883
+  #     target: 8883
+  #   - published: 8084
+  #     target: 8084
+  #   - published: 18083
+  #     target: 18083
+  #   environment:
+  #     EMQX_NAME: emqx
+      # EMQX_LOG__LEVEL: debug
+      # EMQX_HOST: edgex-mqtt-broker
+  
+  notifications:
+    container_name: edgex-support-notifications
+    depends_on:
+      consul:
+        condition: service_started
+      database:
+        condition: service_started
+      security-bootstrap-database:
+        condition: service_started
+      vault-worker:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_ROOTCACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSTORE_SERVERNAME: edgex-vault
+      SECRETSTORE_TOKENFILE: /tmp/edgex/secrets/edgex-support-notifications/secrets-token.json
+      SERVICE_HOST: edgex-support-notifications
+    hostname: edgex-support-notifications
+    image: edgexfoundry/docker-support-notifications-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:48060:48060/tcp
+    read_only: true
+    volumes:
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-support-notifications:/tmp/edgex/secrets/edgex-support-notifications:ro,z
+  rulesengine:
+    container_name: edgex-kuiper
+    depends_on:
+      app-service-rules:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
+    environment:
+      EDGEX__DEFAULT__OPTIONAL__CLIENTID: kuiper-rules-engine
+      EDGEX__DEFAULT__PORT: 1883
+      EDGEX__DEFAULT__PROTOCOL: tcp
+      EDGEX__DEFAULT__SERVER: edgex-mqtt-broker
+      EDGEX__DEFAULT__SERVICESERVER: http://edgex-core-data:48080
+      EDGEX__DEFAULT__TOPIC: rules-events
+      EDGEX__DEFAULT__TYPE: mqtt
+      KUIPER__BASIC__CONSOLELOG: "true"
+      KUIPER__BASIC__RESTPORT: 48075
+    hostname: edgex-kuiper
+    image: emqx/kuiper:1.0.0-alpine
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:20498:20498/tcp
+    - 127.0.0.1:48075:48075/tcp
+  scheduler:
+    container_name: edgex-support-scheduler
+    depends_on:
+      consul:
+        condition: service_started
+      database:
+        condition: service_started
+      security-bootstrap-database:
+        condition: service_started
+      vault-worker:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      INTERVALACTIONS_SCRUBAGED_HOST: edgex-core-data
+      INTERVALACTIONS_SCRUBPUSHED_HOST: edgex-core-data
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_ROOTCACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSTORE_SERVERNAME: edgex-vault
+      SECRETSTORE_TOKENFILE: /tmp/edgex/secrets/edgex-support-scheduler/secrets-token.json
+      SERVICE_HOST: edgex-support-scheduler
+    hostname: edgex-support-scheduler
+    image: edgexfoundry/docker-support-scheduler-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:48085:48085/tcp
+    read_only: true
+    volumes:
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-support-scheduler:/tmp/edgex/secrets/edgex-support-scheduler:ro,z
+  security-bootstrap-database:
+    container_name: edgex-security-bootstrap-database
+    depends_on:
+      database:
+        condition: service_started
+      vault-worker:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "true"
+      REGISTRY_HOST: edgex-core-consul
+      SECRETSTORE_HOST: edgex-vault
+      SECRETSTORE_ROOTCACERTPATH: /tmp/edgex/secrets/ca/ca.pem
+      SECRETSTORE_SERVERNAME: edgex-vault
+      SECRETSTORE_TOKENFILE: /tmp/edgex/secrets/edgex-security-bootstrap-redis/secrets-token.json
+      SERVICE_HOST: edgex-security-bootstrap-database
+    hostname: edgex-security-bootstrap-database
+    image: edgexfoundry/docker-security-bootstrap-redis-go:1.3.0
+    networks:
+      edgex-network: {}
+    read_only: true
+    tmpfs:
+    - /run
+    - /vault
+    volumes:
+    - /tmp/edgex/secrets/ca:/tmp/edgex/secrets/ca:ro,z
+    - /tmp/edgex/secrets/edgex-security-bootstrap-redis:/tmp/edgex/secrets/edgex-security-bootstrap-redis:ro,z
+  security-secrets-setup:
+    command: generate
+    container_name: edgex-secrets-setup
+    hostname: edgex-secrets-setup
+    image: edgexfoundry/docker-security-secrets-setup-go:1.3.0
+    read_only: true
+    tmpfs:
+    - /tmp
+    - /run
+    volumes:
+    - secrets-setup-cache:/etc/edgex/pki:rw
+    - /tmp/edgex/secrets:/tmp/edgex/secrets:z
+    - vault-init:/vault/init:z
+  system:
+    container_name: edgex-sys-mgmt-agent
+    depends_on:
+      command:
+        condition: service_started
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+      notifications:
+        condition: service_started
+      scheduler:
+        condition: service_started
+    environment:
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_RULESENGINE_HOST: edgex-kuiper
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      EXECUTORPATH: /sys-mgmt-executor
+      METRICSMECHANISM: executor
+      REGISTRY_HOST: edgex-core-consul
+      SERVICE_HOST: edgex-sys-mgmt-agent
+    hostname: edgex-sys-mgmt-agent
+    image: edgexfoundry/docker-sys-mgmt-agent-go:1.3.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:48090:48090/tcp
+    read_only: true
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:z
+  vault:
+    cap_add:
+    - IPC_LOCK
+    container_name: edgex-vault
+    depends_on:
+      consul:
+        condition: service_started
+      security-secrets-setup:
+        condition: service_started
+    entrypoint:
+    - /vault/init/start_vault.sh
+    environment:
+      VAULT_ADDR: https://edgex-vault:8200
+      VAULT_CONFIG_DIR: /vault/config
+      VAULT_UI: "true"
+    hostname: edgex-vault
+    image: vault:1.5.3
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:8200:8200/tcp
+    tmpfs:
+    - /vault/config
+    volumes:
+    - /tmp/edgex/secrets/edgex-vault:/tmp/edgex/secrets/edgex-vault:ro,z
+    - vault-file:/vault/file:z
+    - vault-init:/vault/init:ro,z
+    - vault-logs:/vault/logs:z
+  vault-worker:
+    container_name: edgex-vault-worker
+    depends_on:
+      consul:
+        condition: service_started
+      security-secrets-setup:
+        condition: service_started
+      vault:
+        condition: service_started
+    environment:
+      SECRETSTORE_SETUP_DONE_FLAG: /tmp/edgex/secrets/edgex-consul/.secretstore-setup-done
+    hostname: edgex-vault-worker
+    image: edgexfoundry/docker-security-secretstore-setup-go:1.3.0
+    networks:
+      edgex-network: {}
+    read_only: true
+    tmpfs:
+    - /run
+    - /vault
+    volumes:
+    - consul-scripts:/consul/scripts:ro,z
+    - /tmp/edgex/secrets:/tmp/edgex/secrets:z
+    - vault-config:/vault/config:z
+
+#################################################################
+# TIBCO Labs Air
+#################################################################
+
+  service-metadata:
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata:1.3.0
+    ports:
+      - "48530:48530"
+    container_name: air-app-service-metadata
+    hostname: air-app-service-metadata
+    networks:
+      - edgex-network
+    environment:
+      REGISTRY_HOST: edgex-core-consul
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      BINDING_TYPE: edgex-messagebus
+      BINDING_SUBSCRIBETOPIC: events
+      BINDING_PUBLISHTOPIC: edgexevents
+      MESSAGEBUS_TYPE: mqtt
+      MESSAGEBUS_SUBSCRIBEHOST_HOST: edgex-mqtt-broker
+      MESSAGEBUS_SUBSCRIBEHOST_PORT: 1883
+      MESSAGEBUS_PUBLISHHOST_HOST: edgex-mqtt-broker
+      MESSAGEBUS_PUBLISHHOST_PORT: 1883
+      MESSAGEBUS_OPTIONAL_USERNAME: 
+      MESSAGEBUS_OPTIONAL_PASSWORD: 
+      MESSAGEBUS_OPTIONAL_CLIENTID: air-app-service-metadata
+      SERVICE_HOST: air-app-service-metadata
+      SERVICE_PORT: 48530
+      WRITABLE_LOGLEVEL: DEBUG
+      ApplicationSettings_MqttHostname: ${AIR_MQTT_HOSTNAME}
+      ApplicationSettings_MqttPort: ${AIR_MQTT_PORT}
+      ApplicationSettings_MqttUser: ${AIR_MQTT_USER}
+      ApplicationSettings_MqttPassword: ${AIR_MQTT_PASSWORD}
+      ApplicationSettings_MqttTopic: ${AIR_MQTT_DATA_TOPIC}
+      ApplicationSettings_MqttPublisher: ${AIR_MQTT_DATA_METADATA_PUBLISHER}
+      ApplicationSettings_GatewayId: ${GATEWAY_ID}
+      ApplicationSettings_GatewayDescription: ${GATEWAY_DESCRIPTION}
+      ApplicationSettings_GatewayHostname: ${GATEWAY_HOSTNAME}
+      ApplicationSettings_GatewayRouter: ${GATEWAY_ROUTER}
+      ApplicationSettings_GatewayRouterPort: ${GATEWAY_ROUTER_PORT}
+      ApplicationSettings_GatewayDeployNetwork: ${GATEWAY_DEPLOY_NETWORK}
+      ApplicationSettings_GatewayLatitude: ${GATEWAY_LATITUDE}
+      ApplicationSettings_GatewayLongitude: ${GATEWAY_LONGITUDE}
+      ApplicationSettings_GatewayAccessToken: ${EDGEX_TOKEN}
+      ApplicationSettings_GatewayUsername: ${GATEWAY_USERNAME}
+      ApplicationSettings_GatewayPlatform: ${GATEWAY_PLATFORM}
+      ApplicationSettings_MetadataClient: ${GATEWAY_METADATA_CLIENT}
+      ApplicationSettings_MetadataPublishIntervalSecs: ${GATEWAY_METADATA_PUBLISH_INTERVAL_SECS}
+    volumes:
+      - db-data:/data/db
+      - log-data:/edgex/logs
+      - consul-config:/consul/config
+      - consul-data:/consul/data
+    depends_on:
+    - data
+    - command
+    - mqtt-broker
+
+  device-siemens-simulator:
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-siemens-simulator:1.3.0
+    ports:
+      - "48995:48995"
+    container_name: labsair-device-siemens-simulator
+    hostname: labsair-device-siemens-simulator
+    networks:
+      - edgex-network
+    environment:
+      REGISTRY_HOST: edgex-core-consul
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      CLIENTS_SCHEDULER_HOST: edgex-support-scheduler
+      CLIENTS_VIRTUALDEVICE_HOST: edgex-device-virtual
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      SERVICE_HOST: labsair-device-siemens-simulator
+      SERVICE_PORT: 48995
+    volumes:
+      - db-data:/data/db
+      - log-data:/edgex/logs
+      - consul-config:/consul/config
+      - consul-data:/consul/data
+    depends_on:
+      data:
+        condition: service_started
+      command:
+        condition: service_started
+  
+  device-generic-mqtt:
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-mqtt:1.3.0
+    ports:
+      - "49560:49560"
+    container_name: labsair-device-generic-mqtt
+    hostname: labsair-device-generic-mqtt
+    networks:
+      - edgex-network
+    environment:
+      REGISTRY_HOST: edgex-core-consul
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      SERVICE_HOST: labsair-device-generic-mqtt
+      SERVICE_PORT: 49560
+      DEVICE_PROFILESDIR: /res
+      Driver_IncomingHost: ${AIR_MQTT_HOSTNAME}
+      Driver_IncomingPort: ${AIR_MQTT_PORT}
+      Driver_IncomingClientId: ${AIR_GENERIC_MQTT_CLIENT_ID}
+      Driver_ResponseHost: ${AIR_MQTT_HOSTNAME}
+      Driver_ResponsePort: ${AIR_MQTT_PORT}
+      Driver_ResponseClientId: ${AIR_GENERIC_MQTT_RESPONSE_CLIENT_ID}
+    volumes:
+      - db-data:/data/db
+      - log-data:/edgex/logs
+      - consul-config:/consul/config
+      - consul-data:/consul/data
+    depends_on:
+      data:
+        condition: service_started
+      command:
+        condition: service_started
+      metadata:
+        condition: service_started
+  
+  device-generic-rest:
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest:1.3.0
+    ports:
+      - "49565:49565"
+    container_name: labsair-device-generic-rest
+    hostname: labsair-device-generic-rest
+    networks:
+      - edgex-network
+    environment:
+      REGISTRY_HOST: edgex-core-consul
+      CLIENTS_COREDATA_HOST: edgex-core-data
+      CLIENTS_DATA_HOST: edgex-core-data
+      CLIENTS_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_METADATA_HOST: edgex-core-metadata
+      CLIENTS_COMMAND_HOST: edgex-core-command
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      SERVICE_HOST: labsair-device-generic-rest
+      SERVICE_PORT: 49565
+      DEVICE_PROFILESDIR: /res
+    volumes:
+      - db-data:/data/db
+      - log-data:/edgex/logs
+      - consul-config:/consul/config
+      - consul-data:/consul/data
+    depends_on:
+      data:
+        condition: service_started
+      command:
+        condition: service_started
+      metadata:
+        condition: service_started
+
+
