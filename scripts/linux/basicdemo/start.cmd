@@ -58,7 +58,7 @@ timeout 5
 
 docker-compose -f "%COMPOSE_FILE%" up -d device-generic-mqtt
 
-docker-compose -f "%COMPOSE_FILE%" up -d -device-generic-rest
+docker-compose -f "%COMPOSE_FILE%" up -d device-generic-rest
 
 echo "\n"
 echo  "Installing cors plugin"
