@@ -48,7 +48,7 @@ echo "Replacing token!!"
 docker-compose run --rm --entrypoint /edgex/security-proxy-setup edgex-proxy --init=false --useradd=tibuser --group=admin > secToken.txt
 findstr /B /C:"the access token for user tibuser is" secToken.txt > setTokenLine.txt
 FOR /F "tokens=8 delims= " %%G IN (setTokenLine.txt) DO (set token=%%G)
-set EDGEX_TOKEN=%token%
+set EDGEX_TOKEN=%token:~0,-1%
 
 
 docker-compose -f "%COMPOSE_FILE%" up -d service-metadata
