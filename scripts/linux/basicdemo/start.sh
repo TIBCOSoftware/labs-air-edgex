@@ -66,7 +66,7 @@ install_cors_plugin () {
     echo  "Installing cors plugin"
     curl -X POST http://localhost:8001/plugins/ \
     --data "name=cors"  \
-    --data "config.origins=http://ui.oss.labs.air" \
+    --data "config.origins=*" \
     --data "config.methods=GET" \
     --data "config.methods=POST" \
     --data "config.methods=OPTIONS" \
