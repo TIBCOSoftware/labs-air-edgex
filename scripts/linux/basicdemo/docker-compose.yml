@@ -699,7 +699,7 @@ services:
     container_name: air-app-service-metadata
     hostname: air-app-service-metadata
     networks:
-      - edgex-network
+      - air-backend_air-network
     environment:
       REGISTRY_HOST: edgex-core-consul
       CLIENTS_COREDATA_HOST: edgex-core-data
@@ -761,7 +761,7 @@ services:
     container_name: labsair-device-siemens-simulator
     hostname: labsair-device-siemens-simulator
     networks:
-      - edgex-network
+      - air-backend_air-network
     environment:
       REGISTRY_HOST: edgex-core-consul
       CLIENTS_COREDATA_HOST: edgex-core-data
@@ -793,7 +793,7 @@ services:
     container_name: labsair-device-generic-mqtt
     hostname: labsair-device-generic-mqtt
     networks:
-      - edgex-network
+      - air-backend_air-network
     environment:
       REGISTRY_HOST: edgex-core-consul
       CLIENTS_COREDATA_HOST: edgex-core-data
@@ -832,7 +832,7 @@ services:
     container_name: labsair-device-generic-rest
     hostname: labsair-device-generic-rest
     networks:
-      - edgex-network
+      - air-backend_air-network
     environment:
       REGISTRY_HOST: edgex-core-consul
       CLIENTS_COREDATA_HOST: edgex-core-data
