@@ -1,7 +1,7 @@
 version: '3.7'
 networks:
-  edgex-network:
-    driver: bridge
+  air-backend_air-network:
+    external: true
 volumes:
   consul-config: {}
   consul-data: {}
@@ -46,7 +46,7 @@ services:
     hostname: edgex-app-service-configurable-rules
     image: edgexfoundry/docker-app-service-configurable:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:48100:48100/tcp
     read_only: true
@@ -83,7 +83,7 @@ services:
     hostname: edgex-core-command
     image: edgexfoundry/docker-core-command-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:48082:48082/tcp
     read_only: true
@@ -102,7 +102,7 @@ services:
     hostname: edgex-core-consul
     image: edgexfoundry/docker-edgex-consul:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:8500:8500/tcp
     read_only: true
@@ -153,7 +153,7 @@ services:
     hostname: edgex-core-data
     image: edgexfoundry/docker-core-data-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:5563:5563/tcp
     - 127.0.0.1:48080:48080/tcp
@@ -178,7 +178,7 @@ services:
     hostname: edgex-redis
     image: redis:6.0.9-alpine
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:6379:6379/tcp
     read_only: true
@@ -211,7 +211,7 @@ services:
     hostname: edgex-device-mqtt
     image: edgexfoundry/docker-device-mqtt-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:49982:49982/tcp
     read_only: true
@@ -240,7 +240,7 @@ services:
     hostname: edgex-device-virtual
     image: edgexfoundry/docker-device-virtual-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:49990:49990/tcp
   edgex-proxy:
@@ -281,7 +281,7 @@ services:
     hostname: edgex-proxy
     image: edgexfoundry/docker-security-proxy-setup-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     read_only: true
     volumes:
     - consul-scripts:/consul/scripts:ro,z
@@ -312,7 +312,7 @@ services:
     hostname: kong
     image: kong:2.0.5
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - published: 8000
       target: 8000
@@ -341,7 +341,7 @@ services:
     hostname: kong-db
     image: postgres:12.3-alpine
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:5432:5432/tcp
     read_only: true
@@ -368,7 +368,7 @@ services:
       KONG_PG_PASSWORD: kong
     image: kong:2.0.5
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     read_only: true
     tmpfs:
     - /tmp
@@ -408,7 +408,7 @@ services:
     hostname: edgex-core-metadata
     image: edgexfoundry/docker-core-metadata-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:48081:48081/tcp
     read_only: true
@@ -420,7 +420,7 @@ services:
     hostname: edgex-mqtt-broker
     image: eclipse-mosquitto:1.6.3
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - published: 1883
       target: 1883
@@ -430,7 +430,7 @@ services:
   #   hostname: edgex-mqtt-broker
   #   image: emqx/emqx:4.2.7
   #   networks: 
-  #     edgex-network: {}
+  #     air-backend_air-network: {}
   #   ports:
   #   - published: 1883
   #     target: 1883
@@ -478,7 +478,7 @@ services:
     hostname: edgex-support-notifications
     image: edgexfoundry/docker-support-notifications-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:48060:48060/tcp
     read_only: true
@@ -505,7 +505,7 @@ services:
     hostname: edgex-kuiper
     image: emqx/kuiper:1.0.0-alpine
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:20498:20498/tcp
     - 127.0.0.1:48075:48075/tcp
@@ -542,7 +542,7 @@ services:
     hostname: edgex-support-scheduler
     image: edgexfoundry/docker-support-scheduler-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:48085:48085/tcp
     read_only: true
@@ -576,7 +576,7 @@ services:
     hostname: edgex-security-bootstrap-database
     image: edgexfoundry/docker-security-bootstrap-redis-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     read_only: true
     tmpfs:
     - /run
@@ -630,7 +630,7 @@ services:
     hostname: edgex-sys-mgmt-agent
     image: edgexfoundry/docker-sys-mgmt-agent-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:48090:48090/tcp
     read_only: true
@@ -654,7 +654,7 @@ services:
     hostname: edgex-vault
     image: vault:1.5.3
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:8200:8200/tcp
     tmpfs:
@@ -678,7 +678,7 @@ services:
     hostname: edgex-vault-worker
     image: edgexfoundry/docker-security-secretstore-setup-go:1.3.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     read_only: true
     tmpfs:
     - /run
