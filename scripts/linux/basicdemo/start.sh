@@ -22,7 +22,7 @@ COMPOSE_FILE=${1:-docker-compose.yml}
 echo "Using compose file: $COMPOSE_FILE"
 
 run_service () {
-    echo " \n "
+    echo $'\n'
     echo -e "\033[0;32mStarting.. $1\033[0m"
     docker-compose -f "$COMPOSE_FILE" up -d $1
 	
@@ -62,7 +62,7 @@ replace_token () {
 
 
 install_cors_plugin () {
-    echo "\n"
+    echo $'\n'
     echo  "Installing cors plugin"
     curl -X POST http://localhost:8001/plugins/ \
     --data "name=cors"  \
@@ -135,6 +135,6 @@ run_service device-generic-rest
 install_cors_plugin
 
 
-echo "\n"
+echo $'\n'
 echo -e "\033[0;32m All services started. Edgex is ready\033[0m"
 
