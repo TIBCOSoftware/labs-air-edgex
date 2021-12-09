@@ -8,12 +8,13 @@ MICROSERVICES=cmd/device-generic-rest
 DOCKERS=docker_device_generic_rest
 .PHONY: $(DOCKERS)
 
-VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
+VERSION=$(shell cat ./VERSION)
 GIT_SHA=$(shell git rev-parse HEAD)
 
 GOFLAGS=-ldflags "-X github.com/TIBCOSoftware/labs-air/edgexfoundry/device-generic-rest.Version=$(VERSION)"
 
 build: $(MICROSERVICES)
+	$(GO) build ./...
 
 cmd/device-generic-rest:
 	$(GO) build $(GOFLAGS) -o $@ ./cmd
@@ -32,4 +33,12 @@ docker_device_generic_rest:
         --build-arg https_proxy \
 		--label "git_sha=$(GIT_SHA)" \
 		-t tibcosoftware/labs-air-edgex-device-generic-rest:$(VERSION) \
+		.
+
+dockerarm64:
+	docker build --no-cache \
+		--build-arg http_proxy \
+        --build-arg https_proxy \
+		--label "git_sha=$(GIT_SHA)" \
+		-t tibcosoftware/labs-air-edgex-device-generic-rest-arm64:$(VERSION) \
 		.
