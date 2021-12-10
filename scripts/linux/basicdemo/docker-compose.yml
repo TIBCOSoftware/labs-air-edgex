@@ -693,7 +693,7 @@ services:
 #################################################################
 
   service-metadata:
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata:1.3.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata:0.6.0
     ports:
       - "48530:48530"
     container_name: air-app-service-metadata
@@ -755,7 +755,7 @@ services:
     - mqtt-broker
 
   device-siemens-simulator:
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-siemens-simulator:1.3.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-siemens-simulator:0.6.0
     ports:
       - "48995:48995"
     container_name: labsair-device-siemens-simulator
@@ -787,7 +787,7 @@ services:
         condition: service_started
   
   device-generic-mqtt:
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-mqtt:1.3.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-mqtt:0.6.0
     ports:
       - "49560:49560"
     container_name: labsair-device-generic-mqtt
@@ -826,7 +826,7 @@ services:
         condition: service_started
   
   device-generic-rest:
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest:1.3.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest:0.6.0
     ports:
       - "49565:49565"
     container_name: labsair-device-generic-rest
