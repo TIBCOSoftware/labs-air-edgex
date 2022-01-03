@@ -4,6 +4,8 @@ Project Air is an IoT platform for the registration of devices, process of IoT p
 
 For more information please visit [Project Air](https://tibcosoftware.github.io/labs-air/) docs page.
 
+![Static Analysis](https://github.com/TIBCOSoftware/labs-air-edgex/workflows/Static%20Analysis/badge.svg)
+
 ## Introduction
 
 These components are device, services and other [edgex](https://www.edgexfoundry.org/) specific add-ons for project Air.
