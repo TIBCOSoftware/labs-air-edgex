@@ -13,7 +13,7 @@ These components are device, services and other [edgex](https://www.edgexfoundry
 ## Contributing
 
 For information regarding participation in the project, please see our
-[contributing](https://github.com/TIBCOSoftware/labs-air/CONTRIBUTING.md)
+[contributing](https://github.com/TIBCOSoftware/labs-air/blob/master/CONTRIBUTING.md)
 document.
 
 ![Logo](https://tibcosoftware.github.io/TIBCO-LABS/about/tibcolabs-brand.png "Labs Logo")
