@@ -10,4 +10,10 @@ For more information please visit [Project Air](https://tibcosoftware.github.io/
 
 These components are device, services and other [edgex](https://www.edgexfoundry.org/) specific add-ons for project Air.
 
+## Contributing
+
+For information regarding participation in the project, please see our
+[contributing](https://github.com/TIBCOSoftware/labs-air/CONTRIBUTING.md)
+document.
+
 ![Logo](https://tibcosoftware.github.io/TIBCO-LABS/about/tibcolabs-brand.png "Labs Logo")
