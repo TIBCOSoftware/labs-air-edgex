@@ -1,6 +1,6 @@
 networks:
-  edgex-network:
-    driver: bridge
+  air-backend_air-network:
+    external: true
 services:
   command:
     container_name: edgex-core-command
@@ -24,7 +24,7 @@ services:
     hostname: edgex-core-command
     image: edgexfoundry/core-command:${EDGEX_FOUNDRY_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:59882:59882/tcp
     read_only: true
@@ -38,7 +38,7 @@ services:
     hostname: edgex-core-consul
     image: consul:${CONSUL_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - published: 8500
       target: 8500
@@ -80,7 +80,7 @@ services:
     hostname: edgex-core-data
     image: edgexfoundry/core-data:${EDGEX_FOUNDRY_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:5563:5563/tcp
     - 127.0.0.1:59880:59880/tcp
@@ -103,7 +103,7 @@ services:
     hostname: edgex-redis
     image: redis:${REDIS_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:6379:6379/tcp
     read_only: true
@@ -136,7 +136,7 @@ services:
     hostname: edgex-core-metadata
     image: edgexfoundry/core-metadata:${EDGEX_FOUNDRY_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:59881:59881/tcp
     read_only: true
@@ -150,7 +150,7 @@ services:
     hostname: edgex-mqtt-broker
     image: eclipse-mosquitto:${ECLIPSE_MOSQUITTO_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - published: 1883
       target: 1883
@@ -179,7 +179,7 @@ services:
     hostname: edgex-support-notifications
     image: edgexfoundry/support-notifications:${EDGEX_FOUNDRY_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:59860:59860/tcp
     read_only: true
@@ -209,7 +209,7 @@ services:
     hostname: edgex-support-scheduler
     image: edgexfoundry/support-scheduler:${EDGEX_FOUNDRY_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:59861:59861/tcp
     read_only: true
@@ -247,7 +247,7 @@ services:
     hostname: edgex-sys-mgmt-agent
     image: edgexfoundry/sys-mgmt-agent:${EDGEX_FOUNDRY_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:58890:58890/tcp
     read_only: true
@@ -312,7 +312,7 @@ services:
     hostname: air-app-service-metadata
     image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata:${LABS_AIR_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
       - 127.0.0.1:48535:48535/tcp
     read_only: true
@@ -350,7 +350,7 @@ services:
     hostname: air-device-generic-rest
     image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest:${LABS_AIR_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:49565:49565/tcp
     read_only: true
@@ -395,7 +395,7 @@ services:
     hostname: air-device-generic-mqtt
     image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-mqtt:${LABS_AIR_VERSION}
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:49560:49560/tcp
     read_only: true
@@ -429,7 +429,7 @@ services:
     hostname: air-device-sound-simulator
     image: tibcosoftware/labs-air-edgex-device-sound-simulator:2.1.0
     networks:
-      edgex-network: {}
+      air-backend_air-network: {}
     ports:
     - 127.0.0.1:49550:49550/tcp
     read_only: true
