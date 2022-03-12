@@ -2,43 +2,57 @@
 
 GO=CGO_ENABLED=1 GO111MODULE=on go
 
-MICROSERVICES=cmd/app-service-metadata
-.PHONY: $(MICROSERVICES)
+# VERSION file is not needed for local development, In the CI/CD pipeline, a temporary VERSION file is written
+# if you need a specific version, just override below
+# TODO: If your service is not being upstreamed to Edgex Foundry, you need to determine the best approach for
+#       setting your service's version for non-development builds.
+APPVERSION=$(shell cat ./VERSION)
 
-VERSION=$(shell cat ./VERSION)
-GOFLAGS=-ldflags "-X github.com/TIBCOSoftware/labs-air-infra/edgexfoundry/app-service-metadata.Version=$(VERSION)"
+# This pulls the version of the SDK from the go.mod file. If the SDK is the only required module,
+# it must first remove the word 'required' so the offset of $2 is the same if there are multiple required modules
+SDKVERSION=$(shell cat ./go.mod | grep 'github.com/edgexfoundry/app-functions-sdk-go/v2 v' | sed 's/require//g' | awk '{print $$2}')
+
+MICROSERVICE=app-service-metadata
+GOFLAGS=-ldflags "-X github.com/edgexfoundry/app-functions-sdk-go/v2/internal.SDKVersion=$(SDKVERSION) -X github.com/edgexfoundry/app-functions-sdk-go/v2/internal.ApplicationVersion=$(APPVERSION)"
+
+# TODO: uncomment and remove default once files are in a Github repository or
+#       remove totally including usage below
 GIT_SHA=$(shell git rev-parse HEAD)
 
-build: $(MICROSERVICES)
-	$(GO) install -tags=safe
 
-$(MICROSERVICES):
-	$(GO) build $(GOFLAGS) -o $@ ./cmd
+build:
+	go mod tidy
+	$(GO) build $(GOFLAGS) -o $(MICROSERVICE)
 
 docker:
 	docker build --no-cache \
+	    --build-arg http_proxy \
+	    --build-arg https_proxy \
+		-f Dockerfile \
 		--label "git_sha=$(GIT_SHA)" \
-		-t tibcosoftware/labs-air-edgex-app-service-metadata:$(VERSION) \
+		-t tibcosoftware/labs-air-edgex-app-service-metadata:$(APPVERSION) \
 		.
 
 dockerarm64:
 	docker build --no-cache \
+	    --build-arg http_proxy \
+	    --build-arg https_proxy \
+		-f Dockerfile \
 		--label "git_sha=$(GIT_SHA)" \
-		-t tibcosoftware/labs-air-edgex-app-service-metadata-arm64:$(VERSION) \
+		-t tibcosoftware/labs-air-edgex-app-service-metadata-arm64:$(APPVERSION) \
 		.
 
-
-dockerbuildxarm64:
-	docker buildx build \
-		--platform linux/arm64 \
-		--label "git_sha=$(GIT_SHA)" \
-		-t tibcosoftware/docker-app-service-metadata-arm64:$(VERSION) --push \
-		.
-
+# The test-attribution-txt.sh scripts are required for upstreaming to EdgeX Foundry.
+# TODO: Remove bin folder and reference to script below if NOT upstreaming to EdgeX Foundry.
 test:
+	go mod tidy
+	$(GO) test -coverprofile=coverage.out ./...
 	$(GO) vet ./...
 	gofmt -l .
-	$(GO) test -coverprofile=coverage.out ./...
+	[ "`gofmt -l .`" = "" ]
+	./bin/test-attribution-txt.sh
 
 clean:
-	rm -f $(MICROSERVICES)
+	rm -f $(MICROSERVICE)
+
+
