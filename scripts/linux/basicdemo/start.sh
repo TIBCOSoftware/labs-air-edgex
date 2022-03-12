@@ -44,9 +44,10 @@ install_cors_plugin () {
     --data "config.max_age=3600"
 }
 
-docker-compose -f ${COMPOSE_FILE} up
+docker-compose -p edgex -f ${COMPOSE_FILE} up -d
 
-install_cors_plugin
+# Only needed when edgex is running with security enabled
+# install_cors_plugin
 
 
 echo $'\n'
