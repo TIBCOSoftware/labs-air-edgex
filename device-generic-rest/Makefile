@@ -1,6 +1,6 @@
 .PHONY: build test clean prepare update docker
 
-GO = CGO_ENABLED=0 GO111MODULE=on go
+GO = CGO_ENABLED=1 GO111MODULE=on go
 
 MICROSERVICES=cmd/device-generic-rest
 .PHONY: $(MICROSERVICES)
@@ -14,9 +14,9 @@ GIT_SHA=$(shell git rev-parse HEAD)
 GOFLAGS=-ldflags "-X github.com/TIBCOSoftware/labs-air/edgexfoundry/device-generic-rest.Version=$(VERSION)"
 
 build: $(MICROSERVICES)
-	$(GO) build ./...
 
 cmd/device-generic-rest:
+	go mod tidy
 	$(GO) build $(GOFLAGS) -o $@ ./cmd
 
 test:

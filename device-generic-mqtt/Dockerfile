@@ -3,9 +3,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-ARG ALPINE=golang:1.15-alpine
-FROM ${ALPINE} AS builder
-ARG ALPINE_PKG_BASE="build-base git openssh-client"
+ARG BASE=golang:1.16-alpine3.12
+FROM ${BASE} AS builder
+
+ARG ALPINE_PKG_BASE="make git openssh-client gcc libc-dev zeromq-dev libsodium-dev"
 ARG ALPINE_PKG_EXTRA=""
 
 # Replicate the APK repository override.
@@ -18,6 +19,9 @@ WORKDIR /device-generic-mqtt
 
 COPY . .
 
+RUN go mod tidy
+RUN go mod download
+
 # To run tests in the build container:
 #   docker build --build-arg 'MAKE=build test' .
 # This is handy of you do your Docker business on a Mac
@@ -25,11 +29,14 @@ ARG MAKE=build
 RUN make $MAKE
 
 
-FROM scratch
+FROM alpine:3.12
 
-ENV APP_PORT=49982
-EXPOSE $APP_PORT
+# dumb-init needed for injected secure bootstrapping entrypoint script when run in secure mode.
+RUN apk add --update --no-cache zeromq dumb-init
 
 COPY --from=builder /device-generic-mqtt/cmd /
 
-ENTRYPOINT ["/device-generic-mqtt","--confdir=/res"]
+EXPOSE 49560
+
+ENTRYPOINT ["/device-generic-mqtt"]
+CMD ["-cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]

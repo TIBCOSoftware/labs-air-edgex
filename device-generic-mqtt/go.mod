@@ -1,13 +1,12 @@
 module github.com/TIBCOSoftware/labs-air/edgexfoundry/device-generic-mqtt
 
-go 1.15
+go 1.16
 
 require (
-	github.com/eclipse/paho.mqtt.golang v1.2.0
-	github.com/edgexfoundry/device-sdk-go v1.3.0
-	github.com/edgexfoundry/go-mod-core-contracts v0.1.112
-	github.com/kr/pretty v0.1.0 // indirect
-	github.com/spf13/cast v1.3.0
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
+	github.com/eclipse/paho.mqtt.golang v1.3.5
+	github.com/edgexfoundry/device-sdk-go/v2 v2.1.0
+	github.com/edgexfoundry/go-mod-bootstrap/v2 v2.1.0
+	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.1.0
+	github.com/spf13/cast v1.4.1
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 )

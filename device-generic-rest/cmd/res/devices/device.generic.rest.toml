@@ -1,0 +1,8 @@
+[[DeviceList]]
+  Name = "RESTDevice"
+  ProfileName = "Generic-REST-Device"
+  Description = "Generic RESTful Device that sends data of multiple types"
+  Labels = [ "rest" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.other]
+      CommandTopic = "CommandTopic"

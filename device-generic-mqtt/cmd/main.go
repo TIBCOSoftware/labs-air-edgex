@@ -9,7 +9,7 @@ package main
 import (
 	device_generic_mqtt "github.com/TIBCOSoftware/labs-air/edgexfoundry/device-generic-mqtt"
 	"github.com/TIBCOSoftware/labs-air/edgexfoundry/device-generic-mqtt/internal/driver"
-	"github.com/edgexfoundry/device-sdk-go/pkg/startup"
+	"github.com/edgexfoundry/device-sdk-go/v2/pkg/startup"
 )
 
 const (

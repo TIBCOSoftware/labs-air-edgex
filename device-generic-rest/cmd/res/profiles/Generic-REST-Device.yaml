@@ -1,0 +1,90 @@
+name: "Generic-REST-Device"
+manufacturer: "Acne"
+model: "Acne XXXXXX"
+labels:
+- "rest"
+description: "REST Device profile"
+
+deviceResources:
+-
+  name: "image_reading"
+  isHidden: true
+  description: "Image from a camera"
+  properties:
+    valueType: "Binary"
+    readWrite: "R"
+    mediaType: "image/jpeg"
+
+-
+  name: "str_reading"
+  isHidden: true
+  description: "sensor string reading"
+  properties:
+    valueType: "String"
+    readWrite: "R"
+
+-
+  name: "bool_reading"
+  isHidden: true
+  description: "sensor bool reading"
+  properties:
+    valueType: "Bool"
+    readWrite: "R"
+
+-
+  name: "int16_reading"
+  isHidden: true
+  description: "sensor integer reading"
+  properties:
+    valueType: "Int16"
+    readWrite: "R"
+    minimum: "0"
+    maximum: "100"
+    defaultValue: "0"
+    units: "NA"
+
+-
+  name: "float32_reading"
+  isHidden: true
+  description: "sensor float32 reading"
+  properties:
+    valueType: "Float32"
+    readWrite: "R"
+    minimum: "0.0"
+    maximum: "100.0"
+    defaultValue: "0.0"
+    units: "NA"
+    floatEncoding: "eNotation"
+
+deviceCommands:
+-
+  name: dcImageReading
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "image_reading" }
+-
+  name: dcStrReading
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "str_reading" }
+-
+  name: dcBoolReading
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "bool_reading" }
+-
+  name: dcInt16Reading
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "int16_reading" }
+-
+  name: dcFloat32Reading
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "float32_reading" }
+
