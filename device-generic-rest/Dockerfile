@@ -17,10 +17,10 @@
 # This file will work as is for local development. No need to use Dockerfile.build
 
 #build stage
-ARG BASE=golang:1.15-alpine
+ARG BASE=golang:1.16-alpine3.12
 FROM ${BASE} AS builder
 
-ARG ALPINE_PKG_BASE="build-base git openssh-client"
+ARG ALPINE_PKG_BASE="make git openssh-client gcc libc-dev zeromq-dev libsodium-dev"
 ARG ALPINE_PKG_EXTRA=""
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
@@ -32,19 +32,26 @@ WORKDIR /device-generic-rest
 
 
 COPY . .
+
+RUN go mod tidy
+RUN go mod download
+
 ARG MAKE=build
 RUN make $MAKE
 
 #final stage
-FROM scratch
+FROM alpine:3.12
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2019: Intel'
 LABEL Name=device-generic-rest Version=${VERSION}
 
-ENV APP_PORT=59995
-EXPOSE $APP_PORT
+
+RUN apk add --update --no-cache zeromq dumb-init
 
 COPY --from=builder /device-generic-rest/cmd /
 
-ENTRYPOINT ["/device-generic-rest","--confdir=/res"]
+EXPOSE 49565
+
+ENTRYPOINT ["/device-generic-rest"]
+CMD ["--cp=consul://edgex-core-consul:8500", "--confdir=/res", "--registry"]

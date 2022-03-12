@@ -17,16 +17,17 @@
 package main
 
 import (
+	"github.com/TIBCOSoftware/labs-air/edgexfoundry/device-generic-rest"
 	"github.com/TIBCOSoftware/labs-air/edgexfoundry/device-generic-rest/driver"
-	"github.com/edgexfoundry/device-sdk-go"
-	"github.com/edgexfoundry/device-sdk-go/pkg/startup"
+
+	"github.com/edgexfoundry/device-sdk-go/v2/pkg/startup"
 )
 
 const (
-	serviceName string = "edgex-generic-rest"
+	serviceName string = "device-generic-rest"
 )
 
 func main() {
 	sd := driver.RestDriver{}
-	startup.Bootstrap(serviceName, device.Version, &sd)
+	startup.Bootstrap(serviceName, device_generic_rest.Version, &sd)
 }

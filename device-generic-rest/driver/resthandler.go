@@ -18,25 +18,25 @@ package driver
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
 	"net/http"
 	"time"
 
+	"github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
+	sdk "github.com/edgexfoundry/device-sdk-go/v2/pkg/service"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	model "github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cast"
-
-	"github.com/edgexfoundry/device-sdk-go/pkg/models"
-	sdk "github.com/edgexfoundry/device-sdk-go/pkg/service"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 )
 
 const (
-	deviceNameKey     = "deviceName"
-	resourceNameKey   = "resourceName"
-	apiResourceRoute  = clients.ApiBase + "/resource/{" + deviceNameKey + "}/{" + resourceNameKey + "}"
+	apiResourceRoute  = common.ApiBase + "/resource/{" + common.DeviceName + "}/{" + common.ResourceName + "}"
 	handlerContextKey = "RestHandler"
 )
 
@@ -61,7 +61,7 @@ func (handler RestHandler) Start() error {
 		return fmt.Errorf("unable to add required route: %s: %s", apiResourceRoute, err.Error())
 	}
 
-	handler.logger.Info(fmt.Sprintf("Route %s added.", apiResourceRoute))
+	handler.logger.Infof("Route %s added.", apiResourceRoute)
 
 	return nil
 }
@@ -76,60 +76,46 @@ func (handler RestHandler) addContext(next func(http.ResponseWriter, *http.Reque
 
 func (handler RestHandler) processAsyncRequest(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
-	deviceName := vars[deviceNameKey]
-	resourceName := vars[resourceNameKey]
+	deviceName := vars[common.DeviceName]
+	resourceName := vars[common.ResourceName]
 
-	handler.logger.Debug(fmt.Sprintf("Received POST for Device=%s Resource=%s", deviceName, resourceName))
+	handler.logger.Debugf("Received POST for Device=%s Resource=%s", deviceName, resourceName)
 
 	_, err := handler.service.GetDeviceByName(deviceName)
 	if err != nil {
-		handler.logger.Error(fmt.Sprintf("Incoming reading ignored. Device '%s' not found", deviceName))
+		handler.logger.Errorf("Incoming reading ignored. Device '%s' not found", deviceName)
 		http.Error(writer, fmt.Sprintf("Device '%s' not found", deviceName), http.StatusNotFound)
 		return
 	}
 
-	deviceResource, ok := handler.service.DeviceResource(deviceName, resourceName, "get")
+	deviceResource, ok := handler.service.DeviceResource(deviceName, resourceName)
 	if !ok {
-		handler.logger.Error(fmt.Sprintf("Incoming reading ignored. Resource '%s' not found", resourceName))
+		handler.logger.Errorf("Incoming reading ignored. Resource '%s' not found", resourceName)
 		http.Error(writer, fmt.Sprintf("Resource '%s' not found", resourceName), http.StatusNotFound)
 		return
 	}
 
-	if deviceResource.Properties.Value.MediaType != "" {
-		contentType := request.Header.Get(clients.ContentType)
-
-		handler.logger.Debug(fmt.Sprintf("Content Type is '%s' & Media Type is '%s' and Type is '%s'",
-			contentType, deviceResource.Properties.Value.MediaType, deviceResource.Properties.Value.Type))
-
-		if contentType != deviceResource.Properties.Value.MediaType {
-			handler.logger.Error(fmt.Sprintf("Incoming reading ignored. Content Type '%s' doesn't match %s resource's Media Type '%s'",
-				contentType, resourceName, deviceResource.Properties.Value.MediaType))
-
-			http.Error(writer, "Wrong Content-Type", http.StatusBadRequest)
-			return
-		}
-	}
+	contentType := request.Header.Get(common.ContentType)
 
 	var reading interface{}
-	readingType := models.ParseValueType(deviceResource.Properties.Value.Type)
 
-	if readingType == models.Binary {
-		reading, err = handler.readBodyAsBinary(writer, request)
-	} else {
-		reading, err = handler.readBodyAsString(writer, request)
-	}
-
+	data, err := handler.readBody(request)
 	if err != nil {
-		handler.logger.Error(fmt.Sprintf("Incoming reading ignored. Unable to read request body: %s", err.Error()))
+		handler.logger.Errorf("Incoming reading ignored. Unable to read request body: %s", err.Error())
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	value, err := handler.newCommandValue(resourceName, reading, readingType)
+	if deviceResource.Properties.ValueType == common.ValueTypeBinary || deviceResource.Properties.ValueType == common.ValueTypeObject {
+		reading = data
+	} else {
+		reading = string(data)
+	}
+
+	value, err := handler.newCommandValue(deviceResource, reading, deviceResource.Properties.ValueType, contentType)
 	if err != nil {
-		handler.logger.Error(
-			fmt.Sprintf("Incoming reading ignored. Unable to create Command Value for Device=%s Command=%s: %s",
-				deviceName, resourceName, err.Error()))
+		handler.logger.Errorf("Incoming reading ignored. Unable to create Command Value for Device=%s Command=%s: %s",
+			deviceName, resourceName, err.Error())
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -139,26 +125,12 @@ func (handler RestHandler) processAsyncRequest(writer http.ResponseWriter, reque
 		CommandValues: []*models.CommandValue{value},
 	}
 
-	handler.logger.Debug(fmt.Sprintf("Incoming reading received: Device=%s Resource=%s", deviceName, resourceName))
+	handler.logger.Debugf("Incoming reading received: Device=%s Resource=%s", deviceName, resourceName)
 
 	handler.asyncValues <- asyncValues
 }
 
-func (handler RestHandler) readBodyAsString(writer http.ResponseWriter, request *http.Request) (string, error) {
-	defer request.Body.Close()
-	body, err := ioutil.ReadAll(request.Body)
-	if err != nil {
-		return "", err
-	}
-
-	if len(body) == 0 {
-		return "", fmt.Errorf("no request body provided")
-	}
-
-	return string(body), nil
-}
-
-func (handler RestHandler) readBodyAsBinary(writer http.ResponseWriter, request *http.Request) ([]byte, error) {
+func (handler RestHandler) readBody(request *http.Request) ([]byte, error) {
 	defer request.Body.Close()
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
@@ -183,202 +155,205 @@ func deviceHandler(writer http.ResponseWriter, request *http.Request) {
 	handler.processAsyncRequest(writer, request)
 }
 
-func (handler RestHandler) newCommandValue(resourceName string, reading interface{}, valueType models.ValueType) (*models.CommandValue, error) {
-	var result = &models.CommandValue{}
+func (handler RestHandler) newCommandValue(resource model.DeviceResource, reading interface{}, valueType string, contentType string) (*models.CommandValue, error) {
 	var err error
-	var timestamp = time.Now().UnixNano() / int64(time.Millisecond)
-	castError := "fail to parse %v reading, %v"
+	var result = &models.CommandValue{}
+	castError := "failed to parse %v reading, %v"
 
-	if !checkValueInRange(valueType, reading) {
-		err = fmt.Errorf("parse reading fail. Reading %v is out of the value type(%v)'s range", reading, valueType)
-		handler.logger.Error(err.Error())
-		return result, err
-	}
-
+	var val interface{}
 	switch valueType {
-	case models.Binary:
-		val, ok := reading.([]byte)
+	case common.ValueTypeBinary:
+		var ok bool
+		val, ok = reading.([]byte)
 		if !ok {
-			return nil, fmt.Errorf(castError, resourceName, "not []byte")
+			return nil, fmt.Errorf(castError, resource.Name, "not []byte")
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
+		if contentType != resource.Properties.MediaType {
+			return nil, fmt.Errorf("wrong Content-Type: expected '%s' but received '%s'", resource.Properties.MediaType, contentType)
+		}
+	case common.ValueTypeObject:
+		if contentType != common.ContentTypeJSON {
+			return nil, fmt.Errorf("wrong Content-Type: expected '%s' but received '%s'", common.ContentTypeJSON, contentType)
+		}
 
-	case models.Bool:
-		val, err := cast.ToBoolE(reading)
+		data, ok := reading.([]byte)
+		if !ok {
+			return nil, fmt.Errorf(castError, resource.Name, "not []byte")
+		}
+
+		val = map[string]interface{}{}
+		if err := json.Unmarshal(data, &val); err != nil {
+			return nil, errors.New("unable to marshal JSON data to type Object")
+		}
+	case common.ValueTypeBool:
+		val, err = cast.ToBoolE(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.String:
-		val, err := cast.ToStringE(reading)
+	case common.ValueTypeString:
+		val, err = cast.ToStringE(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Uint8:
-		val, err := cast.ToUint8E(reading)
+	case common.ValueTypeUint8:
+		val, err = cast.ToUint8E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Uint16:
-		val, err := cast.ToUint16E(reading)
+		if err := checkUintValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeUint16:
+		val, err = cast.ToUint16E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Uint32:
-		val, err := cast.ToUint32E(reading)
+		if err := checkUintValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeUint32:
+		val, err = cast.ToUint32E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Uint64:
-		val, err := cast.ToUint64E(reading)
+		if err := checkUintValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeUint64:
+		val, err = cast.ToUint64E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Int8:
-		val, err := cast.ToInt8E(reading)
+		if err := checkUintValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeInt8:
+		val, err = cast.ToInt8E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Int16:
-		val, err := cast.ToInt16E(reading)
+		if err := checkIntValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeInt16:
+		val, err = cast.ToInt16E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Int32:
-		val, err := cast.ToInt32E(reading)
+		if err := checkIntValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeInt32:
+		val, err = cast.ToInt32E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Int64:
-		val, err := cast.ToInt64E(reading)
+		if err := checkIntValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeInt64:
+		val, err = cast.ToInt64E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Float32:
-		val, err := cast.ToFloat32E(reading)
+		if err := checkIntValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeFloat32:
+		val, err = cast.ToFloat32E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
-	case models.Float64:
-		val, err := cast.ToFloat64E(reading)
+		if err := checkFloatValueRange(valueType, val); err != nil {
+			return nil, err
+		}
+	case common.ValueTypeFloat64:
+		val, err = cast.ToFloat64E(reading)
 		if err != nil {
-			return nil, fmt.Errorf(castError, resourceName, err)
+			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-		result, err = models.NewCommandValue(resourceName, timestamp, val, valueType)
-
+		if err := checkFloatValueRange(valueType, val); err != nil {
+			return nil, err
+		}
 	default:
-		err = fmt.Errorf("return result fail, none supported value type: %v", valueType)
+		return nil, fmt.Errorf("return result fail, unsupported value type: %v", valueType)
 	}
 
-	return result, err
+	result, err = models.NewCommandValue(resource.Name, valueType, val)
+	if err != nil {
+		return nil, err
+	}
+
+	result.Origin = time.Now().UnixNano() / int64(time.Millisecond)
+	return result, nil
 }
 
-func checkValueInRange(valueType models.ValueType, reading interface{}) bool {
-	isValid := false
-
-	if valueType == models.String || valueType == models.Bool || valueType == models.Binary {
-		return true
-	}
-
-	if valueType == models.Int8 || valueType == models.Int16 ||
-		valueType == models.Int32 || valueType == models.Int64 {
-		val := cast.ToInt64(reading)
-		isValid = checkIntValueRange(valueType, val)
-	}
-
-	if valueType == models.Uint8 || valueType == models.Uint16 ||
-		valueType == models.Uint32 || valueType == models.Uint64 {
-		val := cast.ToUint64(reading)
-		isValid = checkUintValueRange(valueType, val)
-	}
-
-	if valueType == models.Float32 || valueType == models.Float64 {
-		val := cast.ToFloat64(reading)
-		isValid = checkFloatValueRange(valueType, val)
-	}
-
-	return isValid
-}
-
-func checkUintValueRange(valueType models.ValueType, val uint64) bool {
-	var isValid = false
+func checkUintValueRange(valueType string, val interface{}) error {
 	switch valueType {
-	case models.Uint8:
-		if val >= 0 && val <= math.MaxUint8 {
-			isValid = true
+	case common.ValueTypeUint8:
+		valUint8 := val.(uint8)
+		if valUint8 <= math.MaxUint8 {
+			return nil
 		}
-	case models.Uint16:
-		if val >= 0 && val <= math.MaxUint16 {
-			isValid = true
+	case common.ValueTypeUint16:
+		valUint16 := val.(uint16)
+		if valUint16 <= math.MaxUint16 {
+			return nil
 		}
-	case models.Uint32:
-		if val >= 0 && val <= math.MaxUint32 {
-			isValid = true
+	case common.ValueTypeUint32:
+		valUint32 := val.(uint32)
+		if valUint32 <= math.MaxUint32 {
+			return nil
 		}
-	case models.Uint64:
+	case common.ValueTypeUint64:
+		valUint64 := val.(uint64)
 		maxiMum := uint64(math.MaxUint64)
-		if val >= 0 && val <= maxiMum {
-			isValid = true
+		if valUint64 <= maxiMum {
+			return nil
 		}
 	}
-	return isValid
+	return fmt.Errorf("value %v for %s type is out of range", val, valueType)
 }
 
-func checkIntValueRange(valueType models.ValueType, val int64) bool {
-	var isValid = false
+func checkIntValueRange(valueType string, val interface{}) error {
 	switch valueType {
-	case models.Int8:
-		if val >= math.MinInt8 && val <= math.MaxInt8 {
-			isValid = true
+	case common.ValueTypeInt8:
+		valInt8 := val.(int8)
+		if valInt8 >= math.MinInt8 && valInt8 <= math.MaxInt8 {
+			return nil
 		}
-	case models.Int16:
-		if val >= math.MinInt16 && val <= math.MaxInt16 {
-			isValid = true
+	case common.ValueTypeInt16:
+		valInt16 := val.(int16)
+		if valInt16 >= math.MinInt16 && valInt16 <= math.MaxInt16 {
+			return nil
 		}
-	case models.Int32:
-		if val >= math.MinInt32 && val <= math.MaxInt32 {
-			isValid = true
+	case common.ValueTypeInt32:
+		valInt32 := val.(int32)
+		if valInt32 >= math.MinInt32 && valInt32 <= math.MaxInt32 {
+			return nil
 		}
-	case models.Int64:
-		if val >= math.MinInt64 && val <= math.MaxInt64 {
-			isValid = true
+	case common.ValueTypeInt64:
+		valInt64 := val.(int64)
+		if valInt64 >= math.MinInt64 && valInt64 <= math.MaxInt64 {
+			return nil
 		}
 	}
-	return isValid
+	return fmt.Errorf("value %v for %s type is out of range", val, valueType)
 }
 
-func checkFloatValueRange(valueType models.ValueType, val float64) bool {
-	var isValid = false
+func checkFloatValueRange(valueType string, val interface{}) error {
 	switch valueType {
-	case models.Float32:
-		if math.Abs(val) >= math.SmallestNonzeroFloat32 && math.Abs(val) <= math.MaxFloat32 {
-			isValid = true
+	case common.ValueTypeFloat32:
+		valFloat := val.(float32)
+		if math.Abs(float64(valFloat)) >= math.SmallestNonzeroFloat32 && math.Abs(float64(valFloat)) <= math.MaxFloat32 {
+			return nil
 		}
-	case models.Float64:
-		if math.Abs(val) >= math.SmallestNonzeroFloat64 && math.Abs(val) <= math.MaxFloat64 {
-			isValid = true
+	case common.ValueTypeFloat64:
+		valFloat := val.(float64)
+		if math.Abs(valFloat) >= math.SmallestNonzeroFloat64 && math.Abs(valFloat) <= math.MaxFloat64 {
+			return nil
 		}
 	}
-	return isValid
+
+	return fmt.Errorf("value %v for %s type is out of range", val, valueType)
 }
