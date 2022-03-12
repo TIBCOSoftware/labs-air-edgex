@@ -8,94 +8,150 @@ package driver
 
 import (
 	"fmt"
-	"reflect"
-	"strconv"
+	"net/url"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/device-sdk-go/v2/pkg/service"
+	"github.com/edgexfoundry/go-mod-bootstrap/v2/bootstrap/secret"
+	"github.com/edgexfoundry/go-mod-bootstrap/v2/bootstrap/startup"
+	"github.com/edgexfoundry/go-mod-bootstrap/v2/config"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/errors"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 )
 
-type ConnectionInfo struct {
-	Schema   string
-	Host     string
-	Port     string
-	User     string
-	Password string
-	ClientId string
-	Topic    string
+type ServiceConfig struct {
+	MQTTBrokerInfo MQTTBrokerInfo
 }
 
-type configuration struct {
-	IncomingSchema    string
-	IncomingHost      string
-	IncomingPort      int
-	IncomingUser      string
-	IncomingPassword  string
-	IncomingQos       int
-	IncomingKeepAlive int
-	IncomingClientId  string
-	IncomingTopic     string
-
-	ResponseSchema    string
-	ResponseHost      string
-	ResponsePort      int
-	ResponseUser      string
-	ResponsePassword  string
-	ResponseQos       int
-	ResponseKeepAlive int
-	ResponseClientId  string
-	ResponseTopic     string
-}
-
-// CreateDriverConfig use to load driver config for incoming listener and response listener
-func CreateDriverConfig(configMap map[string]string) (*configuration, error) {
-	config := new(configuration)
-	err := load(configMap, config)
-	if err != nil {
-		return config, err
-	}
-	return config, nil
-}
-
-// CreateConnectionInfo use to load MQTT connectionInfo for read and write command
-func CreateConnectionInfo(protocols map[string]models.ProtocolProperties) (*ConnectionInfo, error) {
-	info := new(ConnectionInfo)
-	protocol, ok := protocols[Protocol]
+// UpdateFromRaw updates the service's full configuration from raw data received from
+// the Service Provider.
+func (sw *ServiceConfig) UpdateFromRaw(rawConfig interface{}) bool {
+	configuration, ok := rawConfig.(*ServiceConfig)
 	if !ok {
-		return info, fmt.Errorf("unable to load config, '%s' not exist", Protocol)
+		return false //errors.New("unable to cast raw config to type 'ServiceConfig'")
 	}
 
-	err := load(protocol, info)
-	if err != nil {
-		return info, err
-	}
-	return info, nil
+	*sw = *configuration
+
+	return true
 }
 
-// load by reflect to check map key and then fetch the value
-func load(config map[string]string, des interface{}) error {
-	errorMessage := "unable to load config, '%s' not exist"
-	val := reflect.ValueOf(des).Elem()
-	for i := 0; i < val.NumField(); i++ {
-		typeField := val.Type().Field(i)
-		valueField := val.Field(i)
+type MQTTBrokerInfo struct {
+	Schema    string
+	Host      string
+	Port      int
+	Qos       int
+	KeepAlive int
+	ClientId  string
 
-		val, ok := config[typeField.Name]
-		if !ok {
-			return fmt.Errorf(errorMessage, typeField.Name)
-		}
+	CredentialsRetryTime  int
+	CredentialsRetryWait  int
+	ConnEstablishingRetry int
+	ConnRetryWaitTime     int
 
-		switch valueField.Kind() {
-		case reflect.Int:
-			intVal, err := strconv.Atoi(val)
-			if err != nil {
-				return err
-			}
-			valueField.SetInt(int64(intVal))
-		case reflect.String:
-			valueField.SetString(val)
-		default:
-			return fmt.Errorf("none supported value type %v ,%v", valueField.Kind(), typeField.Name)
-		}
+	AuthMode        string
+	CredentialsPath string
+
+	// Temp fields
+	Username string
+	Password string
+
+	IncomingTopic string
+	ResponseTopic string
+
+	Writable WritableInfo
+}
+
+// Validate ensures your custom configuration has proper values.
+func (info *MQTTBrokerInfo) Validate() errors.EdgeX {
+	if info.Writable.ResponseFetchInterval == 0 {
+		return errors.NewCommonEdgeX(errors.KindContractInvalid, "MQTTBrokerInfo.Writable.ResponseFetchInterval configuration setting can not be blank", nil)
 	}
 	return nil
+}
+
+type WritableInfo struct {
+	// ResponseFetchInterval specifies the retry interval(milliseconds) to fetch the command response from the MQTT broker
+	ResponseFetchInterval int
+}
+
+func fetchCommandTopic(protocols map[string]models.ProtocolProperties) (string, errors.EdgeX) {
+	properties, ok := protocols[Protocol]
+	if !ok {
+		return "", errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("'%s' protocol properties is not defined", Protocol), nil)
+	}
+	commandTopic, ok := properties[CommandTopic]
+	if !ok {
+		return "", errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("'%s' not found in the '%s' protocol properties", CommandTopic, Protocol), nil)
+	}
+	return commandTopic, nil
+}
+
+func SetCredentials(uri *url.URL, category string, authMode string, secretPath string) error {
+	switch authMode {
+	case AuthModeUsernamePassword:
+		credentials, err := GetCredentials(secretPath)
+		if err != nil {
+			return fmt.Errorf("unable to get %s MQTT credentials for secret path '%s': %s", category, secretPath, err.Error())
+		}
+
+		driver.Logger.Infof("%s MQTT credentials loaded", category)
+		uri.User = url.UserPassword(credentials.Username, credentials.Password)
+
+	case AuthModeNone:
+		return nil
+	default:
+		return fmt.Errorf("invalid AuthMode '%s' for %s MQTT connection of", authMode, category)
+	}
+
+	return nil
+}
+
+// This is a temporary work around until there is a practical way to set the mqtt credential in the
+// security vault
+func SetCredentialsNonSecureTemp(uri *url.URL, category string, authMode string, username string, password string) error {
+	switch authMode {
+	case AuthModeUsernamePassword:
+
+		driver.Logger.Infof("%s MQTT credentials loaded", category)
+		uri.User = url.UserPassword(username, password)
+
+	case AuthModeNone:
+		return nil
+	default:
+		return fmt.Errorf("invalid AuthMode '%s' for %s MQTT connection of", authMode, category)
+	}
+
+	return nil
+}
+
+func GetCredentials(secretPath string) (config.Credentials, error) {
+	credentials := config.Credentials{}
+	deviceService := service.RunningService()
+
+	timer := startup.NewTimer(driver.serviceConfig.MQTTBrokerInfo.CredentialsRetryTime, driver.serviceConfig.MQTTBrokerInfo.CredentialsRetryWait)
+
+	var secretData map[string]string
+	var err error
+	for timer.HasNotElapsed() {
+		secretData, err = deviceService.SecretProvider.GetSecret(secretPath, secret.UsernameKey, secret.PasswordKey)
+		if err == nil {
+			break
+		}
+
+		driver.Logger.Warnf(
+			"Unable to retrieve MQTT credentials from SecretProvider at path '%s': %s. Retrying for %s",
+			secretPath,
+			err.Error(),
+			timer.RemainingAsString())
+		timer.SleepForInterval()
+	}
+
+	if err != nil {
+		return credentials, err
+	}
+
+	credentials.Username = secretData[secret.UsernameKey]
+	credentials.Password = secretData[secret.PasswordKey]
+
+	return credentials, nil
 }
