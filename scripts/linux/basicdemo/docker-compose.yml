@@ -1,6 +1,7 @@
 networks:
   air-backend_air-network:
-    external: true
+    name: edgex_edgex-network
+    driver: bridge
 services:
   command:
     container_name: edgex-core-command
