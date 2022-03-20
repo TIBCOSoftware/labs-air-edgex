@@ -17,12 +17,20 @@ deviceResources:
     mediaType: "image/jpeg"
 
 -
-  name: "str_reading"
+  name: "object_reading"
   isHidden: true
+  description: "sensor object reading"
+  properties:
+    valueType: "Object"
+    readWrite: "R"
+
+-
+  name: "str_reading"
+  isHidden: false
   description: "sensor string reading"
   properties:
     valueType: "String"
-    readWrite: "R"
+    readWrite: "RW"
 
 -
   name: "bool_reading"
@@ -34,11 +42,11 @@ deviceResources:
 
 -
   name: "int16_reading"
-  isHidden: true
+  isHidden: false
   description: "sensor integer reading"
   properties:
     valueType: "Int16"
-    readWrite: "R"
+    readWrite: "RW"
     minimum: "0"
     maximum: "100"
     defaultValue: "0"
@@ -65,9 +73,15 @@ deviceCommands:
   resourceOperations:
     - { deviceResource: "image_reading" }
 -
-  name: dcStrReading
+  name: dcObjectReading
   readWrite: "R"
   isHidden: true
+  resourceOperations:
+    - { deviceResource: "object_reading" }
+-
+  name: dcStrReading
+  readWrite: "RW"
+  isHidden: false
   resourceOperations:
     - { deviceResource: "str_reading" }
 -
@@ -78,8 +92,8 @@ deviceCommands:
     - { deviceResource: "bool_reading" }
 -
   name: dcInt16Reading
-  readWrite: "R"
-  isHidden: true
+  readWrite: "RW"
+  isHidden: false
   resourceOperations:
     - { deviceResource: "int16_reading" }
 -
