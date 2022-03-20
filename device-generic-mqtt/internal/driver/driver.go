@@ -159,6 +159,8 @@ func (d *Driver) handleReadCommandRequest(req sdkModel.CommandRequest, topic str
 }
 
 func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]models.ProtocolProperties, reqs []sdkModel.CommandRequest, params []*sdkModel.CommandValue) error {
+	d.Logger.Debugf("HandleWriteCommands for Device: %s", deviceName)
+
 	commandTopic, err := fetchCommandTopic(protocols)
 	if err != nil {
 		return errors.NewCommonEdgeXWrapper(err)
@@ -176,6 +178,8 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]mod
 }
 
 func (d *Driver) handleWriteCommandRequest(req sdkModel.CommandRequest, topic string, param *sdkModel.CommandValue) errors.EdgeX {
+	d.Logger.Debugf("handleWriteCommandRequest for Topic: %s", topic)
+
 	var err error
 	var qos = byte(0)
 	var retained = false
