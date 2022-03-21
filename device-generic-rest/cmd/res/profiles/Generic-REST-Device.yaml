@@ -15,7 +15,6 @@ deviceResources:
     readWrite: "R"
     mediaType: "image/jpeg"
 
-deviceResources:
 -
   name: "object_reading"
   isHidden: true
