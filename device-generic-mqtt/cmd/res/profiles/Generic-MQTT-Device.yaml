@@ -17,6 +17,16 @@ deviceResources:
     mediaType: "image/jpeg"
 
 -
+  name: "stream_uri_reading"
+  isHidden: true
+  description: "Video Stream URI from a camera"
+  attributes:
+    Visualization: "VideoStream"
+  properties:
+    valueType: "Object"
+    readWrite: "R"
+
+-
   name: "object_reading"
   isHidden: true
   description: "sensor object reading"
