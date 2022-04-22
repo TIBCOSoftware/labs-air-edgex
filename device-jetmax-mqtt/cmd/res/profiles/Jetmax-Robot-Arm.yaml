@@ -1,0 +1,211 @@
+name: "Jetmax-Robot-Arm"
+manufacturer: "Hiwonder"
+model: "Jetmax"
+labels:
+- "robot, mqtt, ros"
+description: "AI Robotic Arm"
+
+
+deviceResources:
+-
+  name: "jetmax"
+  isHidden: false
+  description: "Jetmax status"
+  properties:
+    valueType: "Object"
+    readWrite: "RW"
+
+-
+  name: "servo1"
+  isHidden: false
+  description: "Servo 1 status"
+  properties:
+    valueType: "Uint16"
+    readWrite: "RW"
+
+-
+  name: "servo2"
+  isHidden: false
+  description: "Servo 2 status"
+  properties:
+    valueType: "Uint16"
+    readWrite: "RW"
+
+-
+  name: "servo3"
+  isHidden: false
+  description: "Servo3 status"
+  properties:
+    valueType: "Uint16"
+    readWrite: "RW"
+
+-
+  name: "ee_servo1"
+  isHidden: false
+  description: "End effector Servo1 status"
+  properties:
+    valueType: "Uint8"
+    readWrite: "RW"
+
+-
+  name: "ee_servo2"
+  isHidden: false
+  description: "End effector Servo2 status"
+  properties:
+    valueType: "Uint8"
+    readWrite: "RW"
+
+-
+  name: "joint1"
+  isHidden: false
+  description: "Joint 1 status"
+  properties:
+    valueType: "Float32"
+    readWrite: "RW"
+
+-
+  name: "joint2"
+  isHidden: false
+  description: "Joint 2 status"
+  properties:
+    valueType: "Float32"
+    readWrite: "RW"
+
+-
+  name: "joint3"
+  isHidden: false
+  description: "Joint 3 status"
+  properties:
+    valueType: "Float32"
+    readWrite: "RW"
+
+-
+  name: "ee_sucker"
+  isHidden: false
+  description: "End effector Sucker status"
+  properties:
+    valueType: "Bool"
+    readWrite: "RW"
+
+-
+  name: "usbcam_camera_info"
+  isHidden: false
+  description: "Camera information"
+  properties:
+    valueType: "Object"
+    readWrite: "RW"
+
+-
+  name: "usbcam_image_rect"
+  isHidden: false
+  description: "Image Rect"
+  properties:
+    valueType: "Binary"
+    readWrite: "R"
+    mediaType: "image/jpeg"
+
+-
+  name: "usbcam_image_rect_color"
+  isHidden: false
+  description: "Image Rect Color"
+  properties:
+    valueType: "Binary"
+    readWrite: "R"
+    mediaType: "image/jpeg"
+
+-
+  name: "usbcam_image_mono"
+  isHidden: false
+  description: "Image Mono"
+  properties:
+    valueType: "Binary"
+    readWrite: "R"
+    mediaType: "image/jpeg"
+
+-
+  name: "usbcam_image_raw"
+  isHidden: false
+  description: "Image Raw"
+  properties:
+    valueType: "Binary"
+    readWrite: "R"
+    mediaType: "image/jpeg"
+
+-
+  name: "usbcam_image_color"
+  isHidden: false
+  description: "Image Color"
+  properties:
+    valueType: "Binary"
+    readWrite: "R"
+    mediaType: "image/jpeg"
+
+deviceCommands:
+-
+  name: dcJetmax
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "jetmax" }
+-
+  name: dcServo1
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "servo1" }
+
+-
+  name: dcServo2
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "servo2" }
+
+-
+  name: dcServo3
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "servo3" }
+
+-
+  name: dcEEServo1
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "ee_servo1" }
+
+-
+  name: dcEEServo2
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "ee_servo2" }
+
+-
+  name: dcJoint1
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "joint1" }
+
+-
+  name: dcJoint2
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "joint2" }
+
+-
+  name: dcJoint3
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "joint3" }
+
+-
+  name: dcEESucker
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "ee_sucker" }

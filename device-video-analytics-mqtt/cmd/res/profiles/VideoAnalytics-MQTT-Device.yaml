@@ -1,0 +1,43 @@
+name: "VideoAnalytics-MQTT-Device"
+manufacturer: "Acne"
+model: "Acne 12334"
+labels:
+- "mqtt"
+description: "Video Analytics device profile"
+
+
+deviceResources:
+
+-
+  name: "stream_uri"
+  isHidden: true
+  description: "Video Stream URI from a camera"
+  attributes:
+    Visualization: "VideoStream"
+  properties:
+    valueType: "String"
+    readWrite: "R"
+
+-
+  name: "enriched_stream_uri"
+  isHidden: true
+  description: "Video Stream URI enriched by a ML model"
+  attributes:
+    Visualization: "VideoStream"
+  properties:
+    valueType: "String"
+    readWrite: "R"
+
+-
+  name: "model_score"
+  isHidden: true
+  description: "Results of model evaluation"
+  properties:
+    valueType: "Object"
+    readWrite: "R"
+
+
+
+
+
+    

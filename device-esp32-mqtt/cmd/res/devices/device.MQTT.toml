@@ -1,0 +1,15 @@
+[[DeviceList]]
+  Name = "ESP32Device"
+  ProfileName = "ESP32-MQTT-Device"
+  Description = "ESP32 MQTT Device"
+  Labels = [ "MQTT" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.mqtt]
+       # Comment out/remove below to use multi-level topics
+       CommandTopic = "CommandTopic"
+       # Uncomment below to use multi-level topics
+       # CommandTopic = "command/MQTT-test-device"
+#    [[DeviceList.AutoEvents]]
+#       Interval = "20s"
+#       OnChange = false
+#       SourceName = "testrandfloat32"
