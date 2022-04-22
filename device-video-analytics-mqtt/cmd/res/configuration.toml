@@ -1,0 +1,159 @@
+[Writable]
+LogLevel = 'INFO'
+  # InsecureSecrets are required for when Redis is used for message bus
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
+    [Writable.InsecureSecrets.MQTT]
+    path = "credentials"
+      [Writable.InsecureSecrets.MQTT.Secrets]
+      username = ""
+      password = ""
+
+[Service]
+HealthCheckInterval = '10s'
+Host = "host.docker.internal"
+Port = 49575
+ServerBindAddr = ''  # blank value defaults to Service.Host value
+StartupMsg = 'Video Analytics MQTT device started'
+# MaxRequestSize limit the request body size in byte of put command
+MaxRequestSize = 0 # value 0 unlimit the request size.
+RequestTimeout = '5s'
+
+[Registry]
+Host = "localhost"
+Port = 8500
+Type = "consul"
+
+[Clients]
+  [Clients.core-data]
+  Protocol = 'http'
+  Host = 'localhost'
+  Port = 59880
+
+  [Clients.core-metadata]
+  Protocol = 'http'
+  Host = 'localhost'
+  Port = 59881
+
+# [MessageQueue]
+# Protocol = 'redis'
+# Host = 'localhost'
+# Port = 6379
+# Type = 'redis'
+# AuthMode = 'usernamepassword'  # required for redis messagebus (secure or insecure).
+# SecretName = "redisdb"
+# PublishTopicPrefix = 'edgex/events/device' # /<device-profile-name>/<device-name>/<source-name> will be added to this Publish Topic prefix
+#   [MessageQueue.Optional]
+#   # Default MQTT Specific options that need to be here to enable environment variable overrides of them
+#   # Client Identifiers
+#   ClientId = "device-video-analytics-mqtt"
+#   # Connection information
+#   Qos = "0" # Quality of Sevice values are 0 (At most once), 1 (At least once) or 2 (Exactly once)
+#   KeepAlive = "10" # Seconds (must be 2 or greater)
+#   Retained = "false"
+#   AutoReconnect = "true"
+#   ConnectTimeout = "5" # Seconds
+#   SkipCertVerify = "false" # Only used if Cert/Key file or Cert/Key PEMblock are specified
+
+[MessageQueue]
+Protocol = 'tcp'
+Host = 'localhost'
+Port = 1883
+Type = 'mqtt'
+AuthMode = 'none'  # required for redis messagebus (secure or insecure).
+SecretName = "mqtt-bus"
+PublishTopicPrefix = 'edgex/events/device' # /<device-profile-name>/<device-name>/<source-name> will be added to this Publish Topic prefix
+  [MessageQueue.Optional]
+  # Default MQTT Specific options that need to be here to enable environment variable overrides of them
+  # Client Identifiers
+  ClientId = "device-video-analytics-mqtt"
+  # Connection information
+  Qos = "0" # Quality of Sevice values are 0 (At most once), 1 (At least once) or 2 (Exactly once)
+  KeepAlive = "10" # Seconds (must be 2 or greater)
+  Retained = "false"
+  AutoReconnect = "true"
+  ConnectTimeout = "5" # Seconds
+  SkipCertVerify = "false" # Only used if Cert/Key file or Cert/Key PEMblock are specified
+
+[SecretStore]
+Type = 'vault'
+Host = 'localhost'
+Port = 8200
+Path = 'device-video-analytics-mqtt/'
+Protocol = 'http'
+RootCaCertPath = ''
+ServerName = ''
+TokenFile = '/tmp/edgex/secrets/device-video-analytics-mqtt/secrets-token.json'
+    [SecretStore.Authentication]
+    AuthType = 'X-Vault-Token'
+
+[Device]
+DataTransform = true
+MaxCmdOps = 128
+MaxCmdValueLen = 256
+ProfilesDir = './res/profiles'
+DevicesDir = './res/devices'
+UpdateLastConnected = false
+UseMessageBus = true
+Labels = []
+EnableAsyncReadings = true
+AsyncBufferSize = 16
+  [Device.Discovery]
+    Enabled = false
+    interval = '30s'
+
+
+[MQTTBrokerInfo]
+Schema = 'tcp'
+Host = '0.0.0.0'
+Port = 1883
+Qos = 0
+KeepAlive = 3600
+ClientId = 'device-video-analytics-mqtt'
+
+CredentialsRetryTime = 120 # Seconds
+CredentialsRetryWait = 1 # Seconds
+ConnEstablishingRetry = 10
+ConnRetryWaitTime = 5
+
+# AuthMode is the MQTT broker authentication mechanism. Currently, 'none' and 'usernamepassword' is the only AuthMode supported by this service, and the secret keys are 'username' and 'password'.
+AuthMode = 'none'
+CredentialsPath = 'credentials'
+
+# Temp fields
+Username = ''
+Password = ''
+
+IncomingTopic = 'DataTopic'
+ResponseTopic = 'ResponseTopic'
+
+    [MQTTBrokerInfo.Writable]
+    # ResponseFetchInterval specifies the retry interval(milliseconds) to fetch the command response from the MQTT broker
+    ResponseFetchInterval = 500
+
+
+
+# Driver configs
+[Driver]
+IncomingSchema = "tcp"
+IncomingHost = ""
+IncomingPort = "443"
+IncomingUser = "mqtt_admin"
+IncomingPassword = "mqtt_admin"
+IncomingQos = "2"
+IncomingKeepAlive = "36000"
+IncomingClientId = "EdgexGenericDataSubscriber"
+IncomingTopic = "/generic/event"
+ResponseSchema = "tcp"
+ResponseHost = ""
+ResponsePort = "443"
+ResponseUser = "mqtt_admin"
+ResponsePassword = "mqtt_admin"
+ResponseQos = "0"
+ResponseKeepAlive = "36000"
+ResponseClientId = "EdgexGenericCommandResponseSubscriber"
+ResponseTopic = "ResponseTopic"
