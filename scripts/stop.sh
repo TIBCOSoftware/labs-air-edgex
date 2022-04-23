@@ -1,6 +1,5 @@
 #!/bin/bash
 
-docker-compose -p edgex down -v
 network_type=${1:?}
 os_type=${2:?}
 arch_type=${3:?}
