@@ -1,6 +1,6 @@
 #!/bin/bash
 
-installer_type=${1:?}
+network_type=${1:online}
 
 installer_target_path="dist"
 
@@ -10,9 +10,8 @@ fi
 mkdir -p $installer_target_path
 
 # Offline artifacts
-if [[ "${installer_type}" == "offline" ]];
+if [[ "${network_type}" == "offline" ]];
 then
-  
   pushd scripts/linux/basicdemo || exit 1
   ./export.sh || exit 1
   popd > /dev/null || exit 1
