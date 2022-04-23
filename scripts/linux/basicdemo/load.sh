@@ -2,7 +2,7 @@
 
 source .env
 
-docker load --input ./archives/labs-lightcrane-proxy-${EDGEX_FOUNDRY_VERSION}.tar || exit 1
+docker load --input ./archives/core-command:${EDGEX_FOUNDRY_VERSION}.tar || exit 1
 
 docker load --input ./archives/consul-${CONSUL_VERSION}.tar || exit 1
 
