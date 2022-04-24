@@ -7,6 +7,8 @@ docker-compose pull || exit 1
 
 docker save --output ./archives/consul:${CONSUL_VERSION}.tar consul:${CONSUL_VERSION} || exit 1
 
+docker save --output ./archives/redis:${REDIS_VERSION}.tar redis:${REDIS_VERSION} || exit 1
+
 docker save --output ./archives/core-metadata-arm64:${EDGEX_FOUNDRY_VERSION}.tar edgexfoundry/core-metadata-arm64:${EDGEX_FOUNDRY_VERSION} || exit 1
 
 docker save --output ./archives/eclipse-mosquitto:${ECLIPSE_MOSQUITTO_VERSION}.tar eclipse-mosquitto:${ECLIPSE_MOSQUITTO_VERSION} || exit 1
