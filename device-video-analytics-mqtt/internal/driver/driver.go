@@ -311,8 +311,6 @@ func newResult(req sdkModel.CommandRequest, reading interface{}) (*sdkModel.Comm
 		if err != nil {
 			return nil, fmt.Errorf(castError, req.DeviceResourceName, err)
 		}
-	case common.ValueTypeObject:
-		val = reading
 	default:
 		return nil, fmt.Errorf("return result fail, none supported value type: %v", req.Type)
 

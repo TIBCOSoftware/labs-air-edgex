@@ -1,0 +1,24 @@
+name: "ESP32-MQTT-Device"
+manufacturer: "ESP"
+model: "ESP32"
+labels:
+- "mqtt"
+description: "ESP32 device profile"
+
+
+deviceResources:
+-
+  name: "vibration"
+  isHidden: true
+  description: "sensor object reading"
+  properties:
+    valueType: "Object"
+    readWrite: "R"
+
+deviceCommands:
+-
+  name: dcVibration
+  readWrite: "R"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "vibration" }
