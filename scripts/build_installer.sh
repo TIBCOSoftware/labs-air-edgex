@@ -6,7 +6,7 @@ arch_type=${3:?}
 
 build_offline(){
   # Offline artifacts
-  pushd ./installers/community/${arch_type} || exit 1
+  pushd ./installers/community/${arch_type}/edge || exit 1
   ./export.sh || exit 1
   popd > /dev/null || exit 1
 }
