@@ -5,7 +5,7 @@ networks:
 services:
   edgex-core-consul:
     command: agent -ui -bootstrap -server -client 0.0.0.0
-    image: consul:1.10.3
+    image: consul:${CONSUL_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -28,7 +28,7 @@ services:
       DATABASES_PRIMARY_HOST: edgex-redis
       EDGEX_SECURITY_SECRET_STORE: "false"
       REGISTRY_HOST: edgex-core-consul
-    image: redis:6.2.6-alpine
+    image: redis:${REDIS_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -56,7 +56,7 @@ services:
       NOTIFICATIONS_SENDER: edgex-core-metadata
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: edgex-core-metadata
-    image: edgexfoundry/core-metadata-arm64:2.1.0
+    image: edgexfoundry/core-metadata-arm64:${EDGEX_FOUNDRY_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -68,7 +68,7 @@ services:
     user: 2002:2001
   edgex-mqtt-broker:
     command: /usr/sbin/mosquitto -c /mosquitto-no-auth.conf
-    image: eclipse-mosquitto:2.0.12
+    image: eclipse-mosquitto:${ECLIPSE_MOSQUITTO_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -96,7 +96,7 @@ services:
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: edgex-core-command
     hostname: edgex-core-command
-    image: edgexfoundry/core-command-arm64:2.1.0
+    image: edgexfoundry/core-command-arm64:${EDGEX_FOUNDRY_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -131,7 +131,7 @@ services:
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: edgex-core-data
     hostname: edgex-core-data
-    image: edgexfoundry/core-data-arm64:2.1.0
+    image: edgexfoundry/core-data-arm64:${EDGEX_FOUNDRY_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -195,7 +195,7 @@ services:
       APPLICATIONSETTINGS_GATEWAYPLATFORM: ${GATEWAY_PLATFORM}
       APPLICATIONSETTINGS_METADATAPUBLISHINTERVALSECS: ${GATEWAY_METADATA_PUBLISH_INTERVAL_SECS}
     hostname: air-app-service-metadata
-    image: tibcosoftware/labs-air-edgex-app-service-metadata-arm64:2.1.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata-arm64:${LABS_AIR_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -230,7 +230,7 @@ services:
       SERVICE_HOST: air-device-generic-rest
       WRITABLE_LOGLEVEL: DEBUG
     hostname: air-device-generic-rest
-    image: tibcosoftware/labs-air-edgex-device-generic-rest-arm64:2.1.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest-arm64:${LABS_AIR_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -273,7 +273,7 @@ services:
       SERVICE_HOST: air-device-esp32-mqtt
       WRITABLE_LOGLEVEL: DEBUG
     hostname: air-device-esp32-mqtt
-    image: tibcosoftware/labs-air-edgex-device-esp32-mqtt-arm64:2.1.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-esp32-mqtt-arm64:${LABS_AIR_VERSION}
     networks:
       edgex-network: {}
     ports:

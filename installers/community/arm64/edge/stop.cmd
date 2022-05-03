@@ -1,3 +1,3 @@
-#!/bin/sh
+@echo off
 
 docker-compose down -v
