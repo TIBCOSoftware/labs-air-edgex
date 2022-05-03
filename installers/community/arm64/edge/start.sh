@@ -44,7 +44,7 @@ echo "Using compose file: $COMPOSE_FILE"
 #    --data "config.max_age=3600"
 #}
 
-docker-compose -p edgex -f ${COMPOSE_FILE} up -d || exit 1
+docker-compose -p edgex -f "${COMPOSE_FILE}" up -d || exit 1
 
 # Only needed when edgex is running with security enabled
 # install_cors_plugin

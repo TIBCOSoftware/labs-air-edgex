@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=.env
+# shellcheck source=/dev/null
 source .env
 
 docker load --input "./archives/core-command:${EDGEX_FOUNDRY_VERSION}.tar" || exit 1

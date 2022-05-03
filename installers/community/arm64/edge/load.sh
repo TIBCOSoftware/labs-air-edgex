@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=.env
+# shellcheck source=/dev/null
 source .env
 
 docker load --input "./archives/consul:${CONSUL_VERSION}.tar" || exit 1

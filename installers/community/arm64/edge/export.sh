@@ -1,7 +1,7 @@
 #!/bin/bash
 mkdir -p ./archives
 
-# shellcheck source=.env
+# shellcheck source=/dev/null
 source .env
 
 docker-compose pull || exit 1
