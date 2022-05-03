@@ -355,6 +355,8 @@ func newCommandValue(valueType string, param *sdkModel.CommandValue) (interface{
 		commandValue, err = param.Float32Value()
 	case common.ValueTypeFloat64:
 		commandValue, err = param.Float64Value()
+	case common.ValueTypeObject:
+		commandValue, err = param.ObjectValue()
 	default:
 		err = fmt.Errorf("fail to convert param, none supported value type: %v", valueType)
 	}

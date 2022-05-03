@@ -24,18 +24,21 @@ func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 
 	driver.Logger.Debug(fmt.Sprintf("Incoming data: %+v", data))
 
-	if !checkDataWithKey(data, "deviceName") || !checkDataWithKey(data, "resourceName") {
-		return
-	}
+	// if !checkDataWithKey(data, "deviceName") || !checkDataWithKey(data, "resourceName") {
+	// 	return
+	// }
 
-	deviceName := data["deviceName"].(string)
-	resourceName := data["resourceName"].(string)
+	// deviceName := data["deviceName"].(string)
+	// resourceName := data["resourceName"].(string)
 
-	reading, ok := data[resourceName]
-	if !ok {
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
-		return
-	}
+	deviceName := "VADevice"
+	resourceName := "model_score"
+
+	reading := data
+	// if !ok {
+	// 	driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+	// 	return
+	// }
 
 	service := service.RunningService()
 
