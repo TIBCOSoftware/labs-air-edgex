@@ -36,6 +36,13 @@ deviceResources:
     valueType: "Object"
     readWrite: "R"
 
+deviceCommands:
+-
+  name: dcmodelScore
+  readWrite: "R"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "model_score" }
 
 
 
