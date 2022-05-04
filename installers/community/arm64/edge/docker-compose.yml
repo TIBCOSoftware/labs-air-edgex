@@ -205,7 +205,7 @@ services:
     security_opt:
     - no-new-privileges:true
     user: 2002:2001
-    
+
   device-generic-rest:
     container_name: air-device-generic-rest
     depends_on:
@@ -239,7 +239,7 @@ services:
     security_opt:
     - no-new-privileges:true
     user: 2002:2001
-  
+
   device-esp32-mqtt:
     container_name: air-device-esp32-mqtt
     depends_on:
@@ -261,14 +261,14 @@ services:
       MESSAGEQUEUE_PORT: 1883
       MESSAGEQUEUE_AUTHMODE: none
       MESSAGEQUEUE_OPTIONAL_CLIENTID: device-esp32-mqtt
-      MQTTBROKERINFO_HOST: ${AIR_MQTT_HOSTNAME}
-      MQTTBROKERINFO_PORT: ${AIR_MQTT_PORT}
-      MQTTBROKERINFO_CLIENTID: ${AIR_MQTT_ESP32_CLIENTID}
-      MQTTBROKERINFO_AUTHMODE: usernamepassword
-      MQTTBROKERINFO_USERNAME: ${AIR_MQTT_USER}
-      MQTTBROKERINFO_PASSWORD: ${AIR_MQTT_PASSWORD}
-      MQTTBROKERINFO_INCOMINGTOPIC: ${AIR_MQTT_ESP32_INCOMINGTOPIC}
-      MQTTBROKERINFO_RESPONSETOPIC: ${AIR_MQTT_ESP32_RESPONSETOPIC}
+      MQTTBROKERINFO_HOST: ${ADAPTER_MQTTBROKERINFO_HOST}
+      MQTTBROKERINFO_PORT: ${ADAPTER_MQTTBROKERINFO_PORT}
+      MQTTBROKERINFO_CLIENTID: ESP32MQTTClient
+      MQTTBROKERINFO_AUTHMODE: ${ADAPTER_MQTTBROKERINFO_AUTHMODE}
+      MQTTBROKERINFO_USERNAME: ${ADAPTER_MQTTBROKERINFO_USERNAME}
+      MQTTBROKERINFO_PASSWORD: ${ADAPTER_MQTTBROKERINFO_PASSWORD}
+      MQTTBROKERINFO_INCOMINGTOPIC: Trolleys/trolley
+      MQTTBROKERINFO_RESPONSETOPIC: Troleys/response
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: air-device-esp32-mqtt
       WRITABLE_LOGLEVEL: DEBUG
@@ -289,4 +289,3 @@ volumes:
   consul-data: {}
   db-data: {}
   kuiper-data: {}
-
