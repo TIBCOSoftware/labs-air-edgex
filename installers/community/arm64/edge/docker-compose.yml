@@ -5,7 +5,7 @@ networks:
 services:
   edgex-core-consul:
     command: agent -ui -bootstrap -server -client 0.0.0.0
-    image: consul:${CONSUL_VERSION}
+    image: arm64v8/consul:${CONSUL_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -28,7 +28,7 @@ services:
       DATABASES_PRIMARY_HOST: edgex-redis
       EDGEX_SECURITY_SECRET_STORE: "false"
       REGISTRY_HOST: edgex-core-consul
-    image: redis:${REDIS_VERSION}
+    image: arm64v8/redis:${REDIS_VERSION}
     networks:
       edgex-network: {}
     ports:
@@ -68,7 +68,7 @@ services:
     user: 2002:2001
   edgex-mqtt-broker:
     command: /usr/sbin/mosquitto -c /mosquitto-no-auth.conf
-    image: eclipse-mosquitto:${ECLIPSE_MOSQUITTO_VERSION}
+    image: arm64v8/eclipse-mosquitto:${ECLIPSE_MOSQUITTO_VERSION}
     networks:
       edgex-network: {}
     ports:
