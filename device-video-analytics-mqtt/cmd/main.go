@@ -6,6 +6,7 @@
 
 package main
 
+
 import (
 	device_generic_mqtt "github.com/TIBCOSoftware/labs-air/edgexfoundry/device-video-analytics-mqtt"
 	"github.com/TIBCOSoftware/labs-air/edgexfoundry/device-video-analytics-mqtt/internal/driver"
