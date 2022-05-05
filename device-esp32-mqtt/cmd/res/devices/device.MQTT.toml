@@ -1,5 +1,5 @@
 [[DeviceList]]
-  Name = "ESP32Device"
+  Name = "kiravtrpi007"
   ProfileName = "ESP32-MQTT-Device"
   Description = "ESP32 MQTT Device"
   Labels = [ "MQTT" ]
