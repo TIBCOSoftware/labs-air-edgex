@@ -54,7 +54,7 @@ func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 	deviceName = fmt.Sprintf("%s", nameVal)
 	resourceName = "vibration"
 
-	reading = message.Payload()
+	reading = data
 
 	service := service.RunningService()
 
