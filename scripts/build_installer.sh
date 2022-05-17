@@ -14,7 +14,7 @@ build_offline(){
 
 replace_release_version(){
   # Replace release version
-  sed -i  '' "s/LABS_AIR_VERSION=GENERATED_VERSION/LABS_AIR_VERSION=${release_version}/" "${installer_target_path}/${arch_type}/edge/.env"
+  sed -i  "s/LABS_AIR_VERSION=GENERATED_VERSION/LABS_AIR_VERSION=${release_version}/" "${installer_target_path}/${arch_type}/edge/.env"
 }
 
 installer_target_path="dist"
