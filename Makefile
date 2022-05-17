@@ -19,7 +19,7 @@ endif
 
 .PHONY: build-installer
 build-installer:
-	@$(SCRIPTS_PATH)/build_installer.sh  ${NETWORK_TYPE} ${OS_TYPE} ${ARCH_TYPE}
+	@$(SCRIPTS_PATH)/build_installer.sh  ${NETWORK_TYPE} ${OS_TYPE} ${ARCH_TYPE} ${RELEASE_VERSION}
 
 .PHONY: build-push-delete-air-edgex-component
 build-push-delete-air-edgex-component: build-air-edgex-component push-image delete-local-image
