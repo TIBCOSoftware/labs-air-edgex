@@ -1,7 +1,7 @@
 
 #!/bin/sh
 
-ARCH=arm64
+ARCH=-arm64
 CORE_EDGEX_REPOSITORY=edgexfoundry
 CORE_EDGEX_VERSION=2.2.0
 
