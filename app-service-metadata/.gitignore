@@ -10,7 +10,7 @@
 *.dll
 *.so
 *.dylib
-cmd/app-service-metadata
+app-service-metadata
 
 # Test binary, build with `go test -c`
 *.test
