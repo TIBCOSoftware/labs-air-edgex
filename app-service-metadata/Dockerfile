@@ -16,7 +16,7 @@
 #
 
 #build stage
-ARG BASE=golang:1.16-alpine
+ARG BASE=golang:1.17-alpine3.15
 FROM ${BASE} AS builder
 
 ARG ALPINE_PKG_BASE="make git gcc libc-dev libsodium-dev zeromq-dev"
