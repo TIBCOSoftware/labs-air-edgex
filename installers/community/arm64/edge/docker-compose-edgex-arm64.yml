@@ -93,7 +93,7 @@ services:
       WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_BROKERADDRESS: tcp://MQTT_BROKER_ADDRESS_PLACE_HOLDER:1883
       WRITABLE_PIPELINE_FUNCTIONS_MQTTEXPORT_PARAMETERS_TOPIC: edgex-events
     hostname: edgex-app-mqtt-export
-    image: edgexfoundry/app-service-configurable:2.2.0
+    image: edgexfoundry/app-service-configurable-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -164,7 +164,7 @@ services:
       TRIGGER_EDGEXMESSAGEBUS_SUBSCRIBEHOST_PROTOCOL: tcp
       TRIGGER_EDGEXMESSAGEBUS_TYPE: mqtt
     hostname: edgex-app-rules-engine
-    image: edgexfoundry/app-service-configurable:2.2.0
+    image: edgexfoundry/app-service-configurable-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -227,7 +227,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-core-command
-    image: edgexfoundry/core-command:2.2.0
+    image: edgexfoundry/core-command-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -356,7 +356,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-core-data
-    image: edgexfoundry/core-data:2.2.0
+    image: edgexfoundry/core-data-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -486,7 +486,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-device-camera
-    image: edgexfoundry/device-camera:2.2.0
+    image: edgexfoundry/device-camera-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -555,7 +555,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-device-mqtt
-    image: edgexfoundry/device-mqtt:2.2.0
+    image: edgexfoundry/device-mqtt-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -623,7 +623,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-device-rest
-    image: edgexfoundry/device-rest:2.2.0
+    image: edgexfoundry/device-rest-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -806,7 +806,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-core-metadata
-    image: edgexfoundry/core-metadata:2.2.0
+    image: edgexfoundry/core-metadata-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -882,7 +882,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-support-notifications
-    image: edgexfoundry/support-notifications:2.2.0
+    image: edgexfoundry/support-notifications-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -943,7 +943,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-proxy-setup
-    image: edgexfoundry/security-proxy-setup:2.2.0
+    image: edgexfoundry/security-proxy-setup-arm64:2.2.0
     networks:
       edgex-network: {}
     read_only: true
@@ -1045,7 +1045,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-support-scheduler
-    image: edgexfoundry/support-scheduler:2.2.0
+    image: edgexfoundry/support-scheduler-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -1095,7 +1095,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-secretstore-setup
-    image: edgexfoundry/security-secretstore-setup:2.2.0
+    image: edgexfoundry/security-secretstore-setup-arm64:2.2.0
     networks:
       edgex-network: {}
     read_only: true
@@ -1135,7 +1135,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-security-bootstrapper
-    image: edgexfoundry/security-bootstrapper:2.2.0
+    image: edgexfoundry/security-bootstrapper-arm64:2.2.0
     networks:
       edgex-network: {}
     read_only: true
@@ -1201,7 +1201,7 @@ services:
       STAGEGATE_SECRETSTORESETUP_TOKENS_READYPORT: '54322'
       STAGEGATE_WAITFOR_TIMEOUT: 60s
     hostname: edgex-sys-mgmt-agent
-    image: edgexfoundry/sys-mgmt-agent:2.2.0
+    image: edgexfoundry/sys-mgmt-agent-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -1221,7 +1221,7 @@ services:
     environment:
       EDGEX_SECURITY_SECRET_STORE: "true"
     hostname: edgex-ui-go
-    image: edgexfoundry/edgex-ui:2.2.0
+    image: edgexfoundry/edgex-ui-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
