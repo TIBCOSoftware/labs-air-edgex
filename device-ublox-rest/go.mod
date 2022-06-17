@@ -1,14 +1,13 @@
-module github.com/TIBCOSoftware/labs-air/edgexfoundry/device-video-analytics-mqtt
+module github.com/TIBCOSoftware/labs-air/edgexfoundry/device-ublox-rest
 
 go 1.17
 
 require (
-	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/edgexfoundry/device-sdk-go/v2 v2.2.0
-	github.com/edgexfoundry/go-mod-bootstrap/v2 v2.2.0
 	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.2.0
+	github.com/gorilla/mux v1.8.0
 	github.com/spf13/cast v1.4.1
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
+	github.com/stretchr/testify v1.7.1
 )
 
 require (
@@ -17,6 +16,8 @@ require (
 	github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/eclipse/paho.mqtt.golang v1.3.5 // indirect
+	github.com/edgexfoundry/go-mod-bootstrap/v2 v2.2.0 // indirect
 	github.com/edgexfoundry/go-mod-configuration/v2 v2.2.0 // indirect
 	github.com/edgexfoundry/go-mod-messaging/v2 v2.2.0 // indirect
 	github.com/edgexfoundry/go-mod-registry/v2 v2.2.0 // indirect
@@ -30,7 +31,7 @@ require (
 	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/go-redis/redis/v7 v7.3.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/consul/api v1.9.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect

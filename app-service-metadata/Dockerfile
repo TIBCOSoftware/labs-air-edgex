@@ -16,13 +16,13 @@
 #
 
 #build stage
-ARG BASE=golang:1.16-alpine
+ARG BASE=golang:1.17-alpine3.15
 FROM ${BASE} AS builder
 
 ARG ALPINE_PKG_BASE="make git gcc libc-dev libsodium-dev zeromq-dev"
 ARG ALPINE_PKG_EXTRA=""
 
-RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
+# RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
 RUN apk add --update --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 WORKDIR /app
 

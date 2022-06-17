@@ -1,5 +1,6 @@
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2021 IOTech Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,44 +15,39 @@
 # limitations under the License.
 #
 
-# This file will work as is for local development. No need to use Dockerfile.build
-
-#build stage
 ARG BASE=golang:1.17-alpine3.15
 FROM ${BASE} AS builder
 
+ARG MAKE='make build'
 ARG ALPINE_PKG_BASE="make git openssh-client gcc libc-dev zeromq-dev libsodium-dev"
 ARG ALPINE_PKG_EXTRA=""
 
-LABEL license='SPDX-License-Identifier: Apache-2.0' \
-  copyright='Copyright (c) 2019: Intel'
 # RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
-RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
+RUN apk add --update --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
-WORKDIR /device-generic-rest
+WORKDIR /device-ublox-rest
 
+COPY go.mod vendor* ./
+RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
 
 COPY . .
+RUN $MAKE
 
-RUN go mod tidy
-RUN go mod download
-
-ARG MAKE=build
-RUN make $MAKE
-
-#final stage
-FROM alpine:3.12
+FROM alpine:3.14
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2019: Intel'
-LABEL Name=device-generic-rest Version=${VERSION}
 
+LABEL Name=device-ublox-rest Version=${VERSION}
 
+# dumb-init needed for injected secure bootstrapping entrypoint script when run in secure mode.
 RUN apk add --update --no-cache zeromq dumb-init
 
-COPY --from=builder /device-generic-rest/cmd /
+COPY --from=builder /device-ublox-rest/cmd /
+COPY --from=builder /device-ublox-rest/LICENSE /
+COPY --from=builder /device-ublox-rest/Attribution.txt /
 
-EXPOSE 49565
+EXPOSE 49585
 
-ENTRYPOINT ["/device-generic-rest"]
+ENTRYPOINT ["/device-ublox-rest"]
 CMD ["--cp=consul://edgex-core-consul:8500", "--confdir=/res", "--registry"]
