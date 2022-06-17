@@ -1,0 +1,8 @@
+[[DeviceList]]
+  Name = "UbloxRESTDevice"
+  ProfileName = "Ublox-REST-Device"
+  Description = "Ublox RESTful Device that sends data of multiple types"
+  Labels = [ "rest" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.other]
+      CommandTopic = "CommandTopic"

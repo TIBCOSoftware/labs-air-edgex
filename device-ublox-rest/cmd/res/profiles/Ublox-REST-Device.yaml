@@ -1,0 +1,45 @@
+name: "Ublox-REST-Device"
+manufacturer: "Ublox"
+model: "Ublox App sending REST events"
+labels:
+- "rest"
+description: "REST Device profile"
+
+deviceResources:
+-
+  name: "location"
+  isHidden: true
+  description: "sensor location reading"
+  attributes:
+    Visualization: "Map"
+  properties:
+    valueType: "String"
+    readWrite: "R"
+
+-
+  name: "temperature"
+  isHidden: true
+  description: "sensor temperature reading"
+  properties:
+    valueType: "Float32"
+    readWrite: "R"
+    minimum: "0.0"
+    maximum: "100.0"
+    defaultValue: "0.0"
+    units: "NA"
+    floatEncoding: "eNotation"
+
+deviceCommands:
+-
+  name: dcLocation
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "location" }
+-
+  name: dcTemperature
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "temperature" }
+
