@@ -1,5 +1,5 @@
 networks:
-  air-backend_air-network:
+  air-edge-network:
     name: edgex_edgex-network
     driver: bridge
 services:
@@ -57,7 +57,7 @@ services:
     # image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata:${LABS_AIR_VERSION}
     image: tibcosoftware/labs-air-edgex-app-service-metadata:2.2.0
     networks:
-      air-backend_air-network: {}
+      air-edge-network: {}
     ports:
       - 127.0.0.1:48535:48535/tcp
     read_only: true

@@ -1,5 +1,5 @@
 networks:
-  air-backend_air-network:
+  air-edge-network:
     name: edgex_edgex-network
     driver: bridge
 services:
@@ -32,7 +32,7 @@ services:
     hostname: air-device-generic-rest
     image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest:${LABS_AIR_VERSION}
     networks:
-      air-backend_air-network: {}
+      air-edge-network: {}
     ports:
     - 127.0.0.1:49565:49565/tcp
     read_only: true
@@ -80,7 +80,7 @@ services:
     # image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-mqtt:${LABS_AIR_VERSION}
     image: tibcosoftware/labs-air-edgex-device-generic-mqtt:2.2.0
     networks:
-      air-backend_air-network: {}
+      air-edge-network: {}
     ports:
     - 127.0.0.1:49560:49560/tcp
     read_only: true
@@ -114,7 +114,7 @@ services:
 #    hostname: air-device-sound-simulator
 #    image: tibcosoftware/labs-air-edgex-device-sound-simulator:2.1.0
 #    networks:
-#      air-backend_air-network: {}
+#      air-edge-network: {}
 #    ports:
 #    - 127.0.0.1:49550:49550/tcp
 #    read_only: true

@@ -1,5 +1,5 @@
 networks:
-  air-backend_air-network:
+  air-edge-network:
     name: edgex_edgex-network
     driver: bridge
     external: true
@@ -34,7 +34,7 @@ services:
     hostname: air-device-ublox-rest
     image: public.ecr.aws/tibcolabs/labs-air-edgex-device-ublox-rest:${LABS_AIR_VERSION}
     networks:
-      air-backend_air-network: {}
+      air-edge-network: {}
     ports:
     - 127.0.0.1:49585:49585/tcp
     read_only: true
