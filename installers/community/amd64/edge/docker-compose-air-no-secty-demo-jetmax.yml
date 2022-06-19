@@ -1,0 +1,59 @@
+networks:
+  air-edge-network:
+    name: edgex_edgex-network
+    driver: bridge
+    external: true
+services:
+  device-jetmax-mqtt:
+    container_name: air-device-jetmax-mqtt
+    depends_on:
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
+    environment:
+      CLIENTS_CORE_COMMAND_HOST: edgex-core-command
+      CLIENTS_CORE_DATA_HOST: edgex-core-data
+      CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
+      CLIENTS_SUPPORT_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_SUPPORT_SCHEDULER_HOST: edgex-support-scheduler
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      MESSAGEQUEUE_TYPE: mqtt
+      MESSAGEQUEUE_PROTOCOL: tcp
+      MESSAGEQUEUE_HOST: edgex-mqtt-broker
+      MESSAGEQUEUE_PORT: 1883
+      MESSAGEQUEUE_AUTHMODE: none
+      MESSAGEQUEUE_OPTIONAL_CLIENTID: device-jetmax-mqtt
+      MQTTBROKERINFO_HOST: ${ADAPTER_MQTTBROKERINFO_HOST}
+      MQTTBROKERINFO_PORT: ${ADAPTER_MQTTBROKERINFO_PORT}
+      MQTTBROKERINFO_CLIENTID: JetmaxMQTTClient
+      MQTTBROKERINFO_AUTHMODE: ${ADAPTER_MQTTBROKERINFO_AUTHMODE}
+      MQTTBROKERINFO_USERNAME: ${ADAPTER_MQTTBROKERINFO_USERNAME}
+      MQTTBROKERINFO_PASSWORD: ${ADAPTER_MQTTBROKERINFO_PASSWORD}
+      MQTTBROKERINFO_INCOMINGTOPIC: jetmax/#
+      MQTTBROKERINFO_RESPONSETOPIC: jetmax/response
+      REGISTRY_HOST: edgex-core-consul
+      SERVICE_HOST: air-device-jetmax-mqtt
+      WRITABLE_LOGLEVEL: DEBUG
+    hostname: air-device-jetmax-mqtt
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-jetmax-mqtt:${LABS_AIR_VERSION}
+    networks:
+      air-edge-network: {}
+    ports:
+    - 127.0.0.1:49570:49570/tcp
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    user: 2002:2001
+version: '3.7'
+volumes:
+  consul-config: {}
+  consul-data: {}
+  db-data: {}
+  kuiper-data: {}
+
