@@ -56,7 +56,7 @@ services:
       APPLICATIONSETTINGS_GATEWAYPLATFORM: ${GATEWAY_PLATFORM}
       APPLICATIONSETTINGS_METADATAPUBLISHINTERVALSECS: ${GATEWAY_METADATA_PUBLISH_INTERVAL_SECS}
     hostname: air-app-service-metadata
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata:${LABS_AIR_VERSION}
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata-arm64:${LABS_AIR_VERSION}
     networks:
       air-edge-network: {}
     ports:

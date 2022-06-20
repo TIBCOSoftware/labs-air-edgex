@@ -1,21 +1,15 @@
 version: '3.7'
 networks:
-  air-edge-network:
-    name: edgex_edgex-network
+  edgex-network:
     driver: bridge
-    external: true
 services:
-  device-jetmax-mqtt:
-    container_name: air-device-jetmax-mqtt
+  device-esp32-mqtt:
+    container_name: air-device-esp32-mqtt
     depends_on:
-      consul:
-        condition: service_started
-      data:
-        condition: service_started
-      metadata:
-        condition: service_started
-      mqtt-broker:
-        condition: service_started
+    - edgex-core-consul
+    - edgex-core-data
+    - edgex-core-metadata
+    - edgex-mqtt-broker
     environment:
       CLIENTS_CORE_COMMAND_HOST: edgex-core-command
       CLIENTS_CORE_DATA_HOST: edgex-core-data
@@ -29,28 +23,27 @@ services:
       MESSAGEQUEUE_HOST: edgex-mqtt-broker
       MESSAGEQUEUE_PORT: 1883
       MESSAGEQUEUE_AUTHMODE: none
-      MESSAGEQUEUE_OPTIONAL_CLIENTID: device-jetmax-mqtt
+      MESSAGEQUEUE_OPTIONAL_CLIENTID: device-esp32-mqtt
       MQTTBROKERINFO_HOST: ${ADAPTER_MQTTBROKERINFO_HOST}
       MQTTBROKERINFO_PORT: ${ADAPTER_MQTTBROKERINFO_PORT}
-      MQTTBROKERINFO_CLIENTID: JetmaxMQTTClient
+      MQTTBROKERINFO_CLIENTID: ESP32MQTTClient
       MQTTBROKERINFO_AUTHMODE: ${ADAPTER_MQTTBROKERINFO_AUTHMODE}
       MQTTBROKERINFO_USERNAME: ${ADAPTER_MQTTBROKERINFO_USERNAME}
       MQTTBROKERINFO_PASSWORD: ${ADAPTER_MQTTBROKERINFO_PASSWORD}
-      MQTTBROKERINFO_INCOMINGTOPIC: jetmax/#
-      MQTTBROKERINFO_RESPONSETOPIC: jetmax/response
+      MQTTBROKERINFO_INCOMINGTOPIC: Trolleys/trolley
+      MQTTBROKERINFO_RESPONSETOPIC: Troleys/response
       REGISTRY_HOST: edgex-core-consul
-      SERVICE_HOST: air-device-jetmax-mqtt
+      SERVICE_HOST: air-device-esp32-mqtt
       WRITABLE_LOGLEVEL: DEBUG
-    hostname: air-device-jetmax-mqtt
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-jetmax-mqtt:${LABS_AIR_VERSION}
+    hostname: air-device-esp32-mqtt
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-esp32-mqtt-arm64:${LABS_AIR_VERSION}
     networks:
-      air-edge-network: {}
+      edgex-network: {}
     ports:
-    - 127.0.0.1:49570:49570/tcp
+    - 127.0.0.1:49560:49560/tcp
     read_only: true
     security_opt:
     - no-new-privileges:true
     user: 2002:2001
-
 
 
