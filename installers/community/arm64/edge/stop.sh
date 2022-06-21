@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose -p edgex -f docker-compose-edgex-arm64.yml down -v
+docker-compose -p edgex -f docker-compose-air-no-secty.yml -f docker-compose-air-no-secty-demo-generic.yml -f docker-compose-edgex-no-secty.yml down -v
