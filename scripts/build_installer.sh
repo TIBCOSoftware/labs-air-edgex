@@ -25,7 +25,7 @@ then
   build_offline || exit 1
 fi
 
-cp -r "./installers/community/${arch_type}" ${installer_target_path} || exit 1
+cp -r "./installers/community" ${installer_target_path} || exit 1
 
 if [[ "${os_type}" != windows ]];
   then
