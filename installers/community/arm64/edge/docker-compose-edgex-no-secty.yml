@@ -48,7 +48,7 @@ services:
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: edgex-core-command
     hostname: edgex-core-command
-    image: edgexfoundry/core-command:2.2.0
+    image: edgexfoundry/core-command-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -103,7 +103,7 @@ services:
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: edgex-core-data
     hostname: edgex-core-data
-    image: edgexfoundry/core-data:2.2.0
+    image: edgexfoundry/core-data-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -159,7 +159,7 @@ services:
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: edgex-core-metadata
     hostname: edgex-core-metadata
-    image: edgexfoundry/core-metadata:2.2.0
+    image: edgexfoundry/core-metadata-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -172,8 +172,10 @@ services:
   notifications:
     container_name: edgex-support-notifications
     depends_on:
-    - consul
-    - database
+      consul:
+        condition: service_started
+      database:
+        condition: service_started
     environment:
       CLIENTS_CORE_COMMAND_HOST: edgex-core-command
       CLIENTS_CORE_DATA_HOST: edgex-core-data
@@ -185,7 +187,7 @@ services:
       REGISTRY_HOST: edgex-core-consul
       SERVICE_HOST: edgex-support-notifications
     hostname: edgex-support-notifications
-    image: edgexfoundry/support-notifications:2.2.0
+    image: edgexfoundry/support-notifications-arm64:2.2.0
     networks:
       edgex-network: {}
     ports:
@@ -209,6 +211,9 @@ services:
     security_opt:
     - no-new-privileges:true
     user: 2002:2001
+  
+  
+
 version: '3.7'
 volumes:
   consul-config: {}

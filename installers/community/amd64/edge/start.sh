@@ -1,25 +1,6 @@
 #!/bin/bash
 
-# Copyright 2017 Konrad Zapalowicz <bergo.torino@gmail.com>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-# Start EdgeX Foundry services in right order, as described:
-# https://wiki.edgexfoundry.org/display/FA/Get+EdgeX+Foundry+-+Users
-
-COMPOSE_FILE=${1:-docker-compose.yml}
-echo "Using compose file: $COMPOSE_FILE"
 
 
 install_cors_plugin () {
@@ -48,7 +29,7 @@ install_cors_plugin () {
 
 # docker-compose -p edgex -f docker-compose-edgex.yml -f docker-compose-air.yml -f docker-compose-airdemo-generic.yml up -d
 
-docker-compose -p edgex -f docker-compose-edgex.yml up -d
+docker-compose -p edgex -f docker-compose-edgex-no-secty.yml  -f docker-compose-air-no-secty.yml -f docker-compose-air-no-secty-demo-generic.yml up -d
 
 # Only needed when edgex is running with security enabled
 # install_cors_plugin

@@ -1,15 +1,21 @@
 version: '3.7'
 networks:
-  edgex-network:
+  air-edge-network:
+    name: edgex_edgex-network
     driver: bridge
+    external: true
 services:
   service-metadata:
     container_name: air-app-service-metadata
     depends_on:
-    - edgex-core-consul
-    - edgex-core-data
-    - edgex-core-metadata
-    - edgex-mqtt-broker
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
     environment:
       CLIENTS_CORE_COMMAND_HOST: edgex-core-command
       CLIENTS_CORE_DATA_HOST: edgex-core-data
@@ -52,7 +58,7 @@ services:
     hostname: air-app-service-metadata
     image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata-arm64:${LABS_AIR_VERSION}
     networks:
-      edgex-network: {}
+      air-edge-network: {}
     ports:
       - 127.0.0.1:48535:48535/tcp
     read_only: true

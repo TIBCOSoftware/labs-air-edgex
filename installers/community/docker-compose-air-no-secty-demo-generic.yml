@@ -33,7 +33,7 @@ services:
       SERVICE_HOST: air-device-generic-rest
       WRITABLE_LOGLEVEL: DEBUG
     hostname: air-device-generic-rest
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest:${LABS_AIR_VERSION}
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest${ARCH}:${LABS_AIR_VERSION}
     networks:
       air-edge-network: {}
     ports:
@@ -80,8 +80,7 @@ services:
       SERVICE_HOST: air-device-generic-mqtt
       WRITABLE_LOGLEVEL: DEBUG
     hostname: air-device-generic-mqtt
-    # image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-mqtt:${LABS_AIR_VERSION}
-    image: tibcosoftware/labs-air-edgex-device-generic-mqtt:2.2.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-mqtt${ARCH}:${LABS_AIR_VERSION}
     networks:
       air-edge-network: {}
     ports:

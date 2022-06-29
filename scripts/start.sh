@@ -11,8 +11,8 @@ load_offline() {
 }
 
 start(){
-    pushd ./${arch_type}/edge > /dev/null || exit 1
-    ./start.sh || exit 2
+    # pushd ./${arch_type}/edge > /dev/null || exit 1
+    ./start.sh ${arch_type} || exit 2
     popd || exit 1
 }
 

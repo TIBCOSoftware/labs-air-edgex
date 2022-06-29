@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2018-2019 IOTech Ltd
+// Copyright (C) 2018-2021 IOTech Ltd
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -9,10 +9,17 @@ package driver
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
 	"github.com/edgexfoundry/device-sdk-go/v2/pkg/service"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+)
+
+const (
+	name = "name"
+	cmd  = "cmd"
 )
 
 type BoolData struct {
@@ -24,46 +31,96 @@ type IntData struct {
 }
 
 
-func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
+func (d *Driver) onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 	driver.Logger.Debug(fmt.Sprintf("[Incoming listener] Incoming reading received: topic=%v payload=%v", message.Topic(), string(message.Payload())))
 
+	var deviceName string
+	var resourceName string
+	var reading interface{}
+
+
+	incomingTopic := message.Topic()
+	subscribedTopic := d.serviceConfig.MQTTBrokerInfo.IncomingTopic
+	subscribedTopic = strings.Replace(subscribedTopic, "#", "", -1)
+	incomingTopic = strings.Replace(incomingTopic, subscribedTopic, "", -1)
+
+	deviceName = "JetmaxDevice"
+
 	var data map[string]interface{}
-	json.Unmarshal(message.Payload(), &data)
-
-	driver.Logger.Debug(fmt.Sprintf("Incoming data: %+v", data))
-
-	driver.Logger.Debug(fmt.Sprintf("Incoming data value: %+v", data["data"]))
-
-	if !checkDataWithKey(data, "deviceName") || !checkDataWithKey(data, "resourceName") {
+	err := json.Unmarshal(message.Payload(), &data)
+	if err != nil {
+		driver.Logger.Errorf("Error unmarshaling payload: %s", err)
 		return
 	}
 
-	var resourceName string
-	deviceName := "JetmaxDevice"
-	// topic := message.Topic()
+	driver.Logger.Debug(fmt.Sprintf("Incoming data: %+v", data))
 
-	switch message.Topic() {
-	case "jetmax/servo1/status":
+	var ok bool
+	switch incomingTopic {
+	case "arm/status":
 		resourceName = "servo1"
+		reading, ok = data[resourceName]
+		if !ok {
+			driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+			return
+		}
+		publishReading(deviceName, resourceName, reading)
+
+		resourceName = "servo2"
+		reading, ok = data[resourceName]
+		if !ok {
+			driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+			return
+		}
+		publishReading(deviceName, resourceName, reading)
+
+		resourceName = "servo3"
+		reading, ok = data[resourceName]
+		if !ok {
+			driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+			return
+		}
+		publishReading(deviceName, resourceName, reading)
+
+		resourceName = "joint1"
+		reading, ok = data[resourceName]
+		if !ok {
+			driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+			return
+		}
+		publishReading(deviceName, resourceName, reading)
+
+		resourceName = "joint2"
+		reading, ok = data[resourceName]
+		if !ok {
+			driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+			return
+		}
+		publishReading(deviceName, resourceName, reading)
+
+		resourceName = "joint3"
+		reading, ok = data[resourceName]
+		if !ok {
+			driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+			return
+		}
+		publishReading(deviceName, resourceName, reading)
 	default:
 		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
 		return
 	}
 
-	// deviceName := data["deviceName"].(string)
-	// resourceName := data["resourceName"].(string)
 
-	reading, ok := data[resourceName]
-	if !ok {
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
-		return
-	}
+}
+
+
+func publishReading(deviceName string, resourceName string, reading interface{}) {
 
 	service := service.RunningService()
 
 	deviceObject, ok := service.DeviceResource(deviceName, resourceName)
 	if !ok {
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No DeviceObject found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+		driver.Logger.Errorf("[Incoming listener] Incoming reading ignored, device resource `%s` not found from the device `%s`", resourceName, deviceName)
 		return
 	}
 
@@ -73,9 +130,8 @@ func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 	}
 
 	result, err := newResult(req, reading)
-
 	if err != nil {
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored.   topic=%v msg=%v error=%v", message.Topic(), string(message.Payload()), err))
+		driver.Logger.Errorf("[Incoming listener] Incoming reading ignored, %v", err)
 		return
 	}
 
@@ -84,24 +140,6 @@ func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 		CommandValues: []*models.CommandValue{result},
 	}
 
-	driver.Logger.Info(fmt.Sprintf("[Incoming listener] Incoming reading received: topic=%v msg=%v", message.Topic(), string(message.Payload())))
-
 	driver.AsyncCh <- asyncValues
 
-}
-
-func checkDataWithKey(data map[string]interface{}, key string) bool {
-	val, ok := data[key]
-	if !ok {
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No %v found : msg=%v", key, data))
-		return false
-	}
-
-	switch val.(type) {
-	case string:
-		return true
-	default:
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. %v should be string : msg=%v", key, data))
-		return false
-	}
 }

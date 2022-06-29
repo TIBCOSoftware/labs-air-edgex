@@ -1,7 +1,9 @@
+version: '3.7'
 networks:
   air-edge-network:
     name: edgex_edgex-network
     driver: bridge
+    external: true
 services:
   service-metadata:
     container_name: air-app-service-metadata
@@ -54,8 +56,7 @@ services:
       APPLICATIONSETTINGS_GATEWAYPLATFORM: ${GATEWAY_PLATFORM}
       APPLICATIONSETTINGS_METADATAPUBLISHINTERVALSECS: ${GATEWAY_METADATA_PUBLISH_INTERVAL_SECS}
     hostname: air-app-service-metadata
-    # image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata:${LABS_AIR_VERSION}
-    image: tibcosoftware/labs-air-edgex-app-service-metadata:2.2.0
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-app-service-metadata${ARCH}:${LABS_AIR_VERSION}
     networks:
       air-edge-network: {}
     ports:
@@ -65,11 +66,3 @@ services:
     security_opt:
     - no-new-privileges:true
     user: 2002:2001
-
-version: '3.7'
-volumes:
-  consul-config: {}
-  consul-data: {}
-  db-data: {}
-  kuiper-data: {}
-

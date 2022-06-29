@@ -1,15 +1,21 @@
 version: '3.7'
 networks:
-  edgex-network:
+  air-edge-network:
+    name: edgex_edgex-network
     driver: bridge
+    external: true
 services:
-  device-generic-rest:
-    container_name: air-device-generic-rest
+  device-ublox-rest:
+    container_name: air-device-ublox-rest
     depends_on:
-    - edgex-core-consul
-    - edgex-core-data
-    - edgex-core-metadata
-    - edgex-mqtt-broker
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
     environment:
       CLIENTS_CORE_COMMAND_HOST: edgex-core-command
       CLIENTS_CORE_DATA_HOST: edgex-core-data
@@ -24,14 +30,14 @@ services:
       MESSAGEQUEUE_PROTOCOL: tcp
       MESSAGEQUEUE_TYPE: mqtt
       REGISTRY_HOST: edgex-core-consul
-      SERVICE_HOST: air-device-generic-rest
+      SERVICE_HOST: air-device-ublox-rest
       WRITABLE_LOGLEVEL: DEBUG
-    hostname: air-device-generic-rest
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-generic-rest-arm64:${LABS_AIR_VERSION}
+    hostname: air-device-ublox-rest
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-ublox-rest${ARCH}:${LABS_AIR_VERSION}
     networks:
-      edgex-network: {}
+      air-edge-network: {}
     ports:
-    - 127.0.0.1:49565:49565/tcp
+    - 127.0.0.1:49585:49585/tcp
     read_only: true
     security_opt:
     - no-new-privileges:true

@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2019 IOTech Ltd
+// Copyright (C) 2019-2021 IOTech Ltd
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -22,8 +22,8 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 	"github.com/spf13/cast"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var once sync.Once
@@ -67,7 +67,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 		return errors.NewCommonEdgeX(errors.Kind(err), fmt.Sprintf("unable to listen for changes for '%s' custom configuration", WritableInfoSectionName), err)
 	}
 
-	client, err := createMqttClient(d.serviceConfig)
+	client, err := d.createMqttClient(d.serviceConfig)
 	if err != nil {
 		return errors.NewCommonEdgeX(errors.Kind(err), "unable to initial the MQTT client", err)
 	}
@@ -117,22 +117,29 @@ func (d *Driver) handleReadCommandRequest(req sdkModel.CommandRequest, topic str
 	var retained = false
 
 	var method = "get"
-	var cmdUuid = bson.NewObjectId().Hex()
+	var cmdUuid = uuid.NewString()
+
 	var cmd = req.DeviceResourceName
+	var payload []byte
 
-	data := make(map[string]interface{})
-	data["uuid"] = cmdUuid
-	data["method"] = method
-	data["cmd"] = cmd
+	if d.serviceConfig.MQTTBrokerInfo.UseTopicLevels {
+		topic = fmt.Sprintf("%s/%s/%s/%s", topic, cmd, method, cmdUuid)
+		// will publish empty payload
+	} else {
+		data := make(map[string]interface{})
+		data["uuid"] = cmdUuid
+		data["method"] = method
+		data["cmd"] = cmd
 
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return result, err
+		payload, err = json.Marshal(data)
+		if err != nil {
+			return result, err
+		}
 	}
 
-	driver.mqttClient.Publish(topic, qos, retained, jsonData)
+	driver.mqttClient.Publish(topic, qos, retained, payload)
 
-	driver.Logger.Debugf("Publish command: %v", string(jsonData))
+	driver.Logger.Debugf("Publish command: %v", string(payload))
 
 	// fetch response from MQTT broker after publish command successful
 	cmdResponse, ok := d.fetchCommandResponse(cmdUuid)
@@ -143,7 +150,12 @@ func (d *Driver) handleReadCommandRequest(req sdkModel.CommandRequest, topic str
 	driver.Logger.Debugf("Parse command response: %v", cmdResponse)
 
 	var response map[string]interface{}
-	json.Unmarshal([]byte(cmdResponse), &response)
+	err = json.Unmarshal([]byte(cmdResponse), &response)
+	if err != nil {
+		driver.Logger.Errorf("Error unmarshaling response: %s", err)
+		return nil, errors.NewCommonEdgeX(errors.KindIOError, "Error umarshaling the response", err)
+	}
+
 	reading, ok := response[cmd]
 	if !ok {
 		return nil, errors.NewCommonEdgeX(errors.KindContractInvalid, fmt.Sprintf("'%s' field not found in the response %s", cmd, cmdResponse), nil)
@@ -185,37 +197,29 @@ func (d *Driver) handleWriteCommandRequest(req sdkModel.CommandRequest, topic st
 	var retained = false
 
 	var method = "set"
-	var cmdUuid = bson.NewObjectId().Hex()
 	var cmd = req.DeviceResourceName
-
+	var payload []byte
 	data := make(map[string]interface{})
-	data["uuid"] = cmdUuid
-	data["method"] = method
-	data["cmd"] = cmd
 
 	commandValue, err := newCommandValue(req.Type, param)
 	if err != nil {
 		return errors.NewCommonEdgeXWrapper(err)
-	} else {
-		data[cmd] = commandValue
 	}
 
-	jsonData, err := json.Marshal(data)
+	topic = fmt.Sprintf("%s/%s/%s", topic, cmd, method)
+	data["data"] = commandValue
+	data["duration"] = 1
+	
+
+	driver.Logger.Debugf("Publish topic: %v", topic)
+
+	payload, err = json.Marshal(data)
 	if err != nil {
 		return errors.NewCommonEdgeXWrapper(err)
 	}
+	driver.mqttClient.Publish(topic, qos, retained, payload)
 
-	driver.mqttClient.Publish(topic, qos, retained, jsonData)
-
-	driver.Logger.Debugf("Publish command: %v", string(jsonData))
-
-	//wait and fetch response from CommandResponses map
-	cmdResponse, ok := d.fetchCommandResponse(cmdUuid)
-	if !ok {
-		return errors.NewCommonEdgeX(errors.KindServerError, fmt.Sprintf("can not fetch command response: method=%v cmd=%v", method, cmd), nil)
-	}
-
-	driver.Logger.Debugf("Put command finished: %v", cmdResponse)
+	driver.Logger.Debugf("Publish command: %v", string(payload))
 
 	return nil
 }
@@ -355,6 +359,8 @@ func newCommandValue(valueType string, param *sdkModel.CommandValue) (interface{
 		commandValue, err = param.Float32Value()
 	case common.ValueTypeFloat64:
 		commandValue, err = param.Float64Value()
+	case common.ValueTypeObject:
+		commandValue, err = param.ObjectValue()
 	default:
 		err = fmt.Errorf("fail to convert param, none supported value type: %v", valueType)
 	}
@@ -401,7 +407,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 }
 
 // Create a MQTT client
-func createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) {
+func (d *Driver) createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) {
 	var scheme = serviceConfig.MQTTBrokerInfo.Schema
 	var brokerUrl = serviceConfig.MQTTBrokerInfo.Host
 	var brokerPort = serviceConfig.MQTTBrokerInfo.Port
@@ -426,7 +432,7 @@ func createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) 
 
 	var client mqtt.Client
 	for i := 0; i <= serviceConfig.MQTTBrokerInfo.ConnEstablishingRetry; i++ {
-		client, err = mqttClient(mqttClientId, uri, keepAlive)
+		client, err = d.getMqttClient(mqttClientId, uri, keepAlive)
 		if err != nil && i >= serviceConfig.MQTTBrokerInfo.ConnEstablishingRetry {
 			return nil, errors.NewCommonEdgeXWrapper(err)
 		} else if err != nil {
@@ -439,7 +445,7 @@ func createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) 
 	return client, nil
 }
 
-func mqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, error) {
+func (d *Driver) getMqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, error) {
 	driver.Logger.Infof("Create MQTT client and connection: uri=%v clientID=%v ", uri.String(), clientID)
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("%s://%s", uri.Scheme, uri.Host))
@@ -449,7 +455,7 @@ func mqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, erro
 	opts.SetPassword(password)
 	opts.SetKeepAlive(time.Second * time.Duration(keepAlive))
 	opts.SetAutoReconnect(true)
-	opts.OnConnect = onConnectHandler
+	opts.OnConnect = d.onConnectHandler
 
 	client := mqtt.NewClient(opts)
 	token := client.Connect()
@@ -460,12 +466,12 @@ func mqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, erro
 	return client, nil
 }
 
-func onConnectHandler(client mqtt.Client) {
+func (d *Driver) onConnectHandler(client mqtt.Client) {
 	qos := byte(driver.serviceConfig.MQTTBrokerInfo.Qos)
 	responseTopic := driver.serviceConfig.MQTTBrokerInfo.ResponseTopic
 	incomingTopic := driver.serviceConfig.MQTTBrokerInfo.IncomingTopic
 
-	token := client.Subscribe(incomingTopic, qos, onIncomingDataReceived)
+	token := client.Subscribe(incomingTopic, qos, d.onIncomingDataReceived)
 	if token.Wait() && token.Error() != nil {
 		client.Disconnect(0)
 		driver.Logger.Errorf("could not subscribe to topic '%s': %s",
@@ -474,7 +480,7 @@ func onConnectHandler(client mqtt.Client) {
 	}
 	driver.Logger.Infof("Subscribed to topic '%s' for receiving the async reading", incomingTopic)
 
-	token = client.Subscribe(responseTopic, qos, onCommandResponseReceived)
+	token = client.Subscribe(responseTopic, qos, d.onCommandResponseReceived)
 	if token.Wait() && token.Error() != nil {
 		client.Disconnect(0)
 		driver.Logger.Errorf("could not subscribe to topic '%s': %s",
