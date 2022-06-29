@@ -3,6 +3,7 @@
 network_type=${1:?}
 os_type=${2:?}
 arch_type=${3:?}
+release_version=${4:?}
 
 build_offline(){
   # Offline artifacts
@@ -11,6 +12,10 @@ build_offline(){
   popd > /dev/null || exit 1
 }
 
+replace_release_version(){
+  # Replace release version
+  sed -i  "s/LABS_AIR_VERSION=GENERATED_VERSION/LABS_AIR_VERSION=${release_version}/" "${installer_target_path}/${arch_type}/edge/.env"
+}
 
 installer_target_path="dist"
 
@@ -26,6 +31,8 @@ then
 fi
 
 cp -r "./installers/community/${arch_type}" ${installer_target_path} || exit 1
+
+replace_release_version
 
 if [[ "${os_type}" != windows ]];
   then
