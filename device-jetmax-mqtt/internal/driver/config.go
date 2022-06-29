@@ -1,6 +1,6 @@
 // -*- Mode: Go; indent-tabs-mode: t -*-
 //
-// Copyright (C) 2019 IOTech Ltd
+// Copyright (C) 2019-2021 IOTech Ltd
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -54,9 +54,9 @@ type MQTTBrokerInfo struct {
 	// Temp fields
 	Username string
 	Password string
-
 	IncomingTopic string
 	ResponseTopic string
+	UseTopicLevels bool
 
 	Writable WritableInfo
 }
@@ -91,7 +91,7 @@ func SetCredentials(uri *url.URL, category string, authMode string, secretPath s
 	case AuthModeUsernamePassword:
 		credentials, err := GetCredentials(secretPath)
 		if err != nil {
-			return fmt.Errorf("unable to get %s MQTT credentials for secret path '%s': %s", category, secretPath, err.Error())
+			return fmt.Errorf("Unable to get %s MQTT credentials for secret path '%s': %s", category, secretPath, err.Error())
 		}
 
 		driver.Logger.Infof("%s MQTT credentials loaded", category)
