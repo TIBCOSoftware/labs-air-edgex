@@ -30,7 +30,7 @@ then
   build_offline || exit 1
 fi
 
-cp -r "./installers/community/" ${installer_target_path} || exit 1
+cp -r "./installers/community/." ${installer_target_path} || exit 1
 
 replace_release_version
 
