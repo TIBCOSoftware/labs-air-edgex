@@ -12,8 +12,8 @@ load_offline() {
 
 start(){
     # pushd ./${arch_type}/edge > /dev/null || exit 1
-    ./start.sh ${arch_type} || exit 2
-    popd || exit 1
+    ./start-generic.sh ${arch_type} || exit 2
+    # popd || exit 1
 }
 
 if [[ "${network_type}" == "offline" ]]; then
