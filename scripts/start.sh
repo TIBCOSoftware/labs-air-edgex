@@ -3,6 +3,7 @@
 network_type=${1:?}
 os_type=${2:?}
 arch_type=${3:?}
+edge_type=${3:?}
 
 load_offline() {
     pushd ./${arch_type}/edge > /dev/null || exit 1
@@ -12,7 +13,7 @@ load_offline() {
 
 start(){
     # pushd ./${arch_type}/edge > /dev/null || exit 1
-    ./start-generic.sh ${arch_type} || exit 2
+    ./start-${edge_type}.sh ${arch_type} || exit 2
     # popd || exit 1
 }
 
