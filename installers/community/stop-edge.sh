@@ -14,7 +14,7 @@ else
 fi
 
 if [ -n "$2" ]; then
-    EDGE_TYPE=-$2
+    EDGE_TYPE=$2
 else
     EDGE_TYPE="generic"
 fi
