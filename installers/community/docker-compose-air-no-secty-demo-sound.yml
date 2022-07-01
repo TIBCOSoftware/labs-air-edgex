@@ -5,8 +5,8 @@ networks:
     driver: bridge
     external: true
 services:
-  device-ublox-rest:
-    container_name: air-device-ublox-rest
+  device-sound-simulator:
+    container_name: sair-device-sound-simulator
     depends_on:
       consul:
         condition: service_started
@@ -30,17 +30,18 @@ services:
       MESSAGEQUEUE_PROTOCOL: tcp
       MESSAGEQUEUE_TYPE: mqtt
       REGISTRY_HOST: edgex-core-consul
-      SERVICE_HOST: air-device-ublox-rest
+      SERVICE_HOST: air-device-sound-simulator
       WRITABLE_LOGLEVEL: DEBUG
-    hostname: air-device-ublox-rest
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-ublox-rest:${LABS_AIR_VERSION}
+    hostname: air-device-sound-simulator
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-sound-simulator${ARCH}:${LABS_AIR_VERSION}
     networks:
       air-edge-network: {}
     ports:
-    - 127.0.0.1:49585:49585/tcp
+    - 127.0.0.1:49550:49550/tcp
     read_only: true
     security_opt:
     - no-new-privileges:true
     user: 2002:2001
+
 
 

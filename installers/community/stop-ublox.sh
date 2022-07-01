@@ -13,4 +13,4 @@ else
 	export ARCH=""
 fi
 
-docker-compose -p edgex -f docker-compose-air-no-secty.yml -f docker-compose-air-no-secty-demo-generic.yml -f docker-compose-edgex-no-secty.yml down -v
+docker-compose -p edgex -f docker-compose-air-no-secty.yml -f docker-compose-air-no-secty-demo-ublox.yml -f docker-compose-edgex-no-secty.yml down -v

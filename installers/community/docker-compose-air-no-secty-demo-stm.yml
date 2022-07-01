@@ -36,7 +36,7 @@ services:
       SERVICE_HOST: air-device-esp32-mqtt
       WRITABLE_LOGLEVEL: DEBUG
     hostname: air-device-esp32-mqtt
-    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-esp32-mqtt-arm64:${LABS_AIR_VERSION}
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-esp32-mqtt${ARCH}:${LABS_AIR_VERSION}
     networks:
       edgex-network: {}
     ports:
