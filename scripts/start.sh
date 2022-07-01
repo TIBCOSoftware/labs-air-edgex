@@ -13,7 +13,7 @@ load_offline() {
 
 start(){
     # pushd ./${arch_type}/edge > /dev/null || exit 1
-    ./start_edge.sh ${arch_type} ${edge_type} || exit 2
+    ./start-edge.sh ${arch_type} ${edge_type} || exit 2
     # popd || exit 1
 }
 
