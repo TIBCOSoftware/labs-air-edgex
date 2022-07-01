@@ -7,8 +7,8 @@ release_version=${4:?}
 
 build_offline(){
   # Offline artifacts
-  pushd "./installers/community/${arch_type}/edge" || exit 1
-  ./export.sh || exit 1
+  pushd "./installers/community" || exit 1
+  ./export.sh  ${arch_type} || exit 1
   popd > /dev/null || exit 1
 }
 
