@@ -64,6 +64,14 @@ deviceResources:
     readWrite: "RW"
 
 -
+  name: "joint1_control"
+  isHidden: true
+  description: "Joint 1 control"
+  properties:
+    valueType: "Bool"
+    readWrite: "RW"
+
+-
   name: "joint2"
   isHidden: false
   description: "Joint 2 status"
@@ -209,3 +217,10 @@ deviceCommands:
   isHidden: false
   resourceOperations:
     - { deviceResource: "ee_sucker" }
+
+-
+  name: dcJoint1Control
+  readWrite: "RW"
+  isHidden: false
+  resourceOperations:
+    - { deviceResource: "joint1_control" }
