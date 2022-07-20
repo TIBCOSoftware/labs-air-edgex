@@ -207,11 +207,16 @@ func (d *Driver) handleWriteCommandRequest(req sdkModel.CommandRequest, topic st
 	}
 
 	topic = fmt.Sprintf("%s/%s/%s", topic, cmd, method)
-	data["data"] = commandValue
-	data["duration"] = 1
-	
 
 	driver.Logger.Debugf("Publish topic: %v", topic)
+
+	switch req.Type {
+	case common.ValueTypeBool:
+		data["data"] = commandValue
+	default:
+		data["data"] = commandValue
+		data["duration"] = 1
+	}	
 
 	payload, err = json.Marshal(data)
 	if err != nil {
