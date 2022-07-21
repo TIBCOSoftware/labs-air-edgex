@@ -9,6 +9,7 @@ package driver
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
@@ -16,8 +17,16 @@ import (
 )
 
 
-func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
+func (d *Driver) onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 	driver.Logger.Debug(fmt.Sprintf("[Incoming listener] Incoming reading received: topic=%v msg=%v", message.Topic(), string(message.Payload())))
+
+	var deviceName string
+	var resourceName string
+
+	incomingTopic := message.Topic()
+	subscribedTopic := d.serviceConfig.MQTTBrokerInfo.IncomingTopic
+	subscribedTopic = strings.Replace(subscribedTopic, "#", "", -1)
+	incomingTopic = strings.Replace(incomingTopic, subscribedTopic, "", -1)
 
 	var data map[string]interface{}
 	json.Unmarshal(message.Payload(), &data)
@@ -31,20 +40,28 @@ func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 	// deviceName := data["deviceName"].(string)
 	// resourceName := data["resourceName"].(string)
 
-	deviceName := "VADevice"
-	resourceName := "model_score"
+	deviceName = "VADevice"
 
-	reading := data
-	// if !ok {
-	// 	driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
-	// 	return
-	// }
+	switch incomingTopic {
+	case "event/alert":
+		resourceName = "model_score"
+		reading := data
+
+		publishReading(deviceName, resourceName, reading)
+	default:
+		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No reading data found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+		return
+	}
+
+}
+
+func publishReading(deviceName string, resourceName string, reading interface{}) {
 
 	service := service.RunningService()
 
 	deviceObject, ok := service.DeviceResource(deviceName, resourceName)
 	if !ok {
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored. No DeviceObject found : topic=%v msg=%v", message.Topic(), string(message.Payload())))
+		driver.Logger.Errorf("[Incoming listener] Incoming reading ignored, device resource `%s` not found from the device `%s`", resourceName, deviceName)
 		return
 	}
 
@@ -54,9 +71,8 @@ func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 	}
 
 	result, err := newResult(req, reading)
-
 	if err != nil {
-		driver.Logger.Warn(fmt.Sprintf("[Incoming listener] Incoming reading ignored.   topic=%v msg=%v error=%v", message.Topic(), string(message.Payload()), err))
+		driver.Logger.Errorf("[Incoming listener] Incoming reading ignored, %v", err)
 		return
 	}
 
@@ -64,8 +80,6 @@ func onIncomingDataReceived(client mqtt.Client, message mqtt.Message) {
 		DeviceName:    deviceName,
 		CommandValues: []*models.CommandValue{result},
 	}
-
-	driver.Logger.Info(fmt.Sprintf("[Incoming listener] Incoming reading received: topic=%v msg=%v", message.Topic(), string(message.Payload())))
 
 	driver.AsyncCh <- asyncValues
 

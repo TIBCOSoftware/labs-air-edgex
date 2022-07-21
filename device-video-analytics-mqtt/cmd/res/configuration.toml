@@ -130,6 +130,7 @@ Password = ''
 
 IncomingTopic = 'DataTopic'
 ResponseTopic = 'ResponseTopic'
+UseTopicLevels = true
 
     [MQTTBrokerInfo.Writable]
     # ResponseFetchInterval specifies the retry interval(milliseconds) to fetch the command response from the MQTT broker

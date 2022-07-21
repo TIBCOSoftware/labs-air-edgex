@@ -12,7 +12,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func onCommandResponseReceived(client mqtt.Client, message mqtt.Message) {
+func (d *Driver) onCommandResponseReceived(client mqtt.Client, message mqtt.Message) {
 	var response map[string]interface{}
 
 	json.Unmarshal(message.Payload(), &response)

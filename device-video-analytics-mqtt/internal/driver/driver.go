@@ -67,7 +67,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 		return errors.NewCommonEdgeX(errors.Kind(err), fmt.Sprintf("unable to listen for changes for '%s' custom configuration", WritableInfoSectionName), err)
 	}
 
-	client, err := createMqttClient(d.serviceConfig)
+	client, err := d.createMqttClient(d.serviceConfig)
 	if err != nil {
 		return errors.NewCommonEdgeX(errors.Kind(err), "unable to initial the MQTT client", err)
 	}
@@ -403,7 +403,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.Pro
 }
 
 // Create a MQTT client
-func createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) {
+func (d *Driver) createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) {
 	var scheme = serviceConfig.MQTTBrokerInfo.Schema
 	var brokerUrl = serviceConfig.MQTTBrokerInfo.Host
 	var brokerPort = serviceConfig.MQTTBrokerInfo.Port
@@ -428,7 +428,7 @@ func createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) 
 
 	var client mqtt.Client
 	for i := 0; i <= serviceConfig.MQTTBrokerInfo.ConnEstablishingRetry; i++ {
-		client, err = mqttClient(mqttClientId, uri, keepAlive)
+		client, err = d.getMqttClient(mqttClientId, uri, keepAlive)
 		if err != nil && i >= serviceConfig.MQTTBrokerInfo.ConnEstablishingRetry {
 			return nil, errors.NewCommonEdgeXWrapper(err)
 		} else if err != nil {
@@ -441,7 +441,7 @@ func createMqttClient(serviceConfig *ServiceConfig) (mqtt.Client, errors.EdgeX) 
 	return client, nil
 }
 
-func mqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, error) {
+func (d *Driver) getMqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, error) {
 	driver.Logger.Infof("Create MQTT client and connection: uri=%v clientID=%v ", uri.String(), clientID)
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("%s://%s", uri.Scheme, uri.Host))
@@ -451,7 +451,7 @@ func mqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, erro
 	opts.SetPassword(password)
 	opts.SetKeepAlive(time.Second * time.Duration(keepAlive))
 	opts.SetAutoReconnect(true)
-	opts.OnConnect = onConnectHandler
+	opts.OnConnect = d.onConnectHandler
 
 	client := mqtt.NewClient(opts)
 	token := client.Connect()
@@ -462,12 +462,12 @@ func mqttClient(clientID string, uri *url.URL, keepAlive int) (mqtt.Client, erro
 	return client, nil
 }
 
-func onConnectHandler(client mqtt.Client) {
+func (d *Driver) onConnectHandler(client mqtt.Client) {
 	qos := byte(driver.serviceConfig.MQTTBrokerInfo.Qos)
 	responseTopic := driver.serviceConfig.MQTTBrokerInfo.ResponseTopic
 	incomingTopic := driver.serviceConfig.MQTTBrokerInfo.IncomingTopic
 
-	token := client.Subscribe(incomingTopic, qos, onIncomingDataReceived)
+	token := client.Subscribe(incomingTopic, qos, d.onIncomingDataReceived)
 	if token.Wait() && token.Error() != nil {
 		client.Disconnect(0)
 		driver.Logger.Errorf("could not subscribe to topic '%s': %s",
@@ -476,7 +476,7 @@ func onConnectHandler(client mqtt.Client) {
 	}
 	driver.Logger.Infof("Subscribed to topic '%s' for receiving the async reading", incomingTopic)
 
-	token = client.Subscribe(responseTopic, qos, onCommandResponseReceived)
+	token = client.Subscribe(responseTopic, qos, d.onCommandResponseReceived)
 	if token.Wait() && token.Error() != nil {
 		client.Disconnect(0)
 		driver.Logger.Errorf("could not subscribe to topic '%s': %s",
