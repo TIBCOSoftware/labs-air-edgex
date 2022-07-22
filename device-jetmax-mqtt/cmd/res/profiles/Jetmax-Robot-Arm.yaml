@@ -68,7 +68,7 @@ deviceResources:
   isHidden: true
   description: "Joint 1 control"
   properties:
-    valueType: "Bool"
+    valueType: "String"
     readWrite: "RW"
 
 -
