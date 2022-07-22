@@ -8,7 +8,7 @@
        # Comment out/remove below to use multi-level topics
        # CommandTopic = "CommandTopic"
        # Uncomment below to use multi-level topics
-       CommandTopic = "command/JetmaxDevice"
+       CommandTopic = "JetmaxDevice"
 #    [[DeviceList.AutoEvents]]
 #       Interval = "20s"
 #       OnChange = false
