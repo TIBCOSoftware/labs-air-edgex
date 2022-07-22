@@ -213,6 +213,8 @@ func (d *Driver) handleWriteCommandRequest(req sdkModel.CommandRequest, topic st
 	switch req.Type {
 	case common.ValueTypeBool:
 		data["data"] = commandValue
+	case common.ValueTypeString:
+		data["data"] = commandValue
 	default:
 		data["data"] = commandValue
 		data["duration"] = 1
