@@ -65,7 +65,7 @@ deviceResources:
 
 -
   name: "joint1_control"
-  isHidden: true
+  isHidden: false
   description: "Joint 1 control"
   properties:
     valueType: "String"
