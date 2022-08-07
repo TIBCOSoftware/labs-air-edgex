@@ -1,0 +1,51 @@
+version: '3.7'
+networks:
+  air-edge-network:
+    name: edgex_edgex-network
+    driver: bridge
+    external: true
+services:
+  device-onvif-camera:
+    container_name: edgex-device-onvif-camera
+    depends_on:
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
+    environment:
+      CLIENTS_CORE_COMMAND_HOST: edgex-core-command
+      CLIENTS_CORE_DATA_HOST: edgex-core-data
+      CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
+      CLIENTS_SUPPORT_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_SUPPORT_SCHEDULER_HOST: edgex-support-scheduler
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      MESSAGEQUEUE_AUTHMODE: none
+      MESSAGEQUEUE_HOST: edgex-mqtt-broker
+      MESSAGEQUEUE_PORT: "1883"
+      MESSAGEQUEUE_PROTOCOL: tcp
+      MESSAGEQUEUE_TYPE: mqtt
+      REGISTRY_HOST: edgex-core-consul
+      SERVICE_HOST: edgex-device-onvif-camera
+      WRITABLE_LOGLEVEL: DEBUG
+    hostname: edgex-device-onvif-camera
+    image: edgexfoundry/device-onvif-camera:2.2.0
+    networks:
+      air-edge-network: {}
+    ports:
+    - mode: ingress
+      host_ip: 127.0.0.1
+      target: 59984
+      published: "59984"
+      protocol: tcp
+    read_only: true
+    restart: always
+    security_opt:
+    - no-new-privileges:true
+    user: 2002:2001
+
+

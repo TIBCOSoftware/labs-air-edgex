@@ -1,0 +1,56 @@
+version: '3.7'
+networks:
+  air-edge-network:
+    name: edgex_edgex-network
+    driver: bridge
+    external: true
+services:
+  device-video-analytics-mqtt:
+    container_name: air-device-video-analytics-mqtt
+    depends_on:
+      consul:
+        condition: service_started
+      data:
+        condition: service_started
+      metadata:
+        condition: service_started
+      mqtt-broker:
+        condition: service_started
+    environment:
+      CLIENTS_CORE_COMMAND_HOST: edgex-core-command
+      CLIENTS_CORE_DATA_HOST: edgex-core-data
+      CLIENTS_CORE_METADATA_HOST: edgex-core-metadata
+      CLIENTS_SUPPORT_NOTIFICATIONS_HOST: edgex-support-notifications
+      CLIENTS_SUPPORT_SCHEDULER_HOST: edgex-support-scheduler
+      DATABASES_PRIMARY_HOST: edgex-redis
+      EDGEX_SECURITY_SECRET_STORE: "false"
+      MESSAGEQUEUE_TYPE: mqtt
+      MESSAGEQUEUE_PROTOCOL: tcp
+      MESSAGEQUEUE_HOST: edgex-mqtt-broker
+      MESSAGEQUEUE_PORT: 1883
+      MESSAGEQUEUE_AUTHMODE: none
+      MESSAGEQUEUE_OPTIONAL_CLIENTID: device-video-analytics-mqtt
+      MQTTBROKERINFO_HOST: ${ADAPTER_MQTTBROKERINFO_HOST}
+      MQTTBROKERINFO_PORT: ${ADAPTER_MQTTBROKERINFO_PORT}
+      MQTTBROKERINFO_CLIENTID: DeviceAnalyticsMQTTClient
+      MQTTBROKERINFO_AUTHMODE: ${ADAPTER_MQTTBROKERINFO_AUTHMODE}
+      MQTTBROKERINFO_USERNAME: ${ADAPTER_MQTTBROKERINFO_USERNAME}
+      MQTTBROKERINFO_PASSWORD: ${ADAPTER_MQTTBROKERINFO_PASSWORD}
+      MQTTBROKERINFO_INCOMINGTOPIC: depthai/#
+      MQTTBROKERINFO_RESPONSETOPIC: depthai/response
+      REGISTRY_HOST: edgex-core-consul
+      SERVICE_HOST: air-device-video-analytics-mqtt
+      WRITABLE_LOGLEVEL: DEBUG
+    hostname: air-device-video-analytics-mqtt
+    image: public.ecr.aws/tibcolabs/labs-air-edgex-device-video-analytics-mqtt:${LABS_AIR_VERSION}
+    # image: tibcosoftware/labs-air-edgex-device-video-analytics-mqtt:2.2.0
+    networks:
+      edgex-network: {}
+    ports:
+    - 127.0.0.1:49575:49575/tcp
+    read_only: true
+    security_opt:
+    - no-new-privileges:true
+    user: 2002:2001
+
+
