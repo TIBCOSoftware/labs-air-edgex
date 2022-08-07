@@ -1,0 +1,30 @@
+name: "Sound-SimDevice"
+manufacturer: "Acme"
+model: "SG"
+labels:
+- "sound"
+description: "Sound device profile"
+
+
+deviceResources:
+-
+  name: "microphone"
+  isHidden: true
+  description: "audio simulation"
+  attributes:
+    { Pin_Num: "A0", Interface: "AIO", Type: "IN", Visualization: "Sound", Inferable: "YES" }
+  properties:
+    valueType: "String"
+    readWrite: "R"
+
+deviceCommands:
+-
+  name: "dcMicrophone"
+  readWrite: "R"
+  isHidden: true
+  resourceOperations:
+    - { deviceResource: "microphone" }
+
+  
+  
+

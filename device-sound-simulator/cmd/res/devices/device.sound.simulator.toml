@@ -1,0 +1,10 @@
+[[DeviceList]]
+  Name = "Fan"
+  ProfileName = "Sound-SimDevice"
+  Description = "Fan device simulator"
+  Labels = [ "sound", "plant" ]
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.other]
+      Address = "devicesoundplant"
+      Port = "300"
+
