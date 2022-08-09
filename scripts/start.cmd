@@ -7,5 +7,5 @@ set ARCH=""
 set EDGE_TYPE="generic"
 
 
-call start-edge.cmd $ARCH $EDGE_TYPE
+call start-edge.cmd %ARCH% %EDGE_TYPE%
 
