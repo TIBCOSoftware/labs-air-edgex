@@ -2,8 +2,10 @@
 
 echo %1
 
-if "%1%"==""  set ARCH=""
-if "%1%"=="amd64"  set ARCH=""
+set ARCH=
+
+if "%1%"==""  set ARCH=
+if "%1%"=="amd64"  set ARCH=
 
 set EDGE_TYPE=%2
 if "%2%"==""  set EDGE_TYPE="generic"
