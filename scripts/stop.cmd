@@ -4,4 +4,4 @@ set ARCH=""
 
 set EDGE_TYPE="generic"
 
-call stop-edge.cmd $ARCH $EDGE_TYPE
+call stop-edge.cmd %ARCH% %EDGE_TYPE%

@@ -13,7 +13,7 @@ if "%2%"==""  set EDGE_TYPE="generic"
 echo  " Starting Edge: %EDGE_TYPE%"
 
 
-docker-compose -p edgex -f docker-compose-edgex-no-secty.yml  -f docker-compose-air-no-secty.yml -f docker-compose-air-no-secty-demo-%EDGE_TYPE%.yml up
+docker-compose -p edgex -f docker-compose-edgex-no-secty.yml  -f docker-compose-air-no-secty.yml -f docker-compose-air-no-secty-demo-%EDGE_TYPE%.yml up -d
 
 
 echo "\n"
