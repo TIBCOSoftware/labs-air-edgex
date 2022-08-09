@@ -40,3 +40,8 @@ if [[ "${os_type}" != windows ]];
     cp scripts/stop.sh $installer_target_path || exit 1
   fi
 
+if [[ "${os_type}" == windows ]];
+  then
+    cp scripts/start.cmd $installer_target_path || exit 1
+    cp scripts/stop.cmd $installer_target_path || exit 1
+  fi
