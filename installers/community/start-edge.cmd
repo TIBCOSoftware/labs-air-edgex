@@ -4,7 +4,6 @@ echo %1
 
 if "%1%"==""  set ARCH=""
 if "%1%"=="amd64"  set ARCH=""
-if "%1%"=="arm64"  set ARCH="-arm64"
 
 set EDGE_TYPE=%2
 if "%2%"==""  set EDGE_TYPE="generic"
